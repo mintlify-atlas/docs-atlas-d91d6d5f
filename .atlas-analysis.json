@@ -1,0 +1,84 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "app-datepicker",
+  "projectDescription": "Material Design datepicker web component built with Lit for modern web applications",
+  "theme": "palm",
+  "primaryColor": "#1976D2",
+  "lightColor": "#42A5F5",
+  "darkColor": "#0D47A1",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/basic-usage",
+              "guides/localization",
+              "guides/styling",
+              "guides/advanced-features"
+            ]
+          },
+          {
+            "group": "Migration",
+            "pages": [
+              "migration/upgrading"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Components",
+            "pages": [
+              "api/app-date-picker",
+              "api/app-date-picker-dialog",
+              "api/app-date-picker-input",
+              "api/month-calendar",
+              "api/year-grid"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "api/helper-functions",
+              "api/typescript-types"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Material Design 2021 compliant datepicker components",
+    "Built with Lit for modern web standards",
+    "Full internationalization support via Intl API",
+    "Multiple component variants (picker, dialog, input)",
+    "TypeScript support with comprehensive type definitions",
+    "Accessible and keyboard navigable"
+  ],
+  "publicApiSurface": [
+    "app-date-picker",
+    "app-date-picker-dialog",
+    "app-date-picker-input",
+    "app-month-calendar",
+    "app-year-grid",
+    "date-picker",
+    "date-picker-dialog",
+    "date-picker-input",
+    "month-calendar",
+    "year-grid",
+    "root-element"
+  ]
+}
