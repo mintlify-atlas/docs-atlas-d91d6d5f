@@ -1,0 +1,418 @@
+---
+title: 'app-date-picker'
+description: 'Main date picker component with calendar and year grid views'
+---
+
+## Overview
+
+The `app-date-picker` component provides a Material Design date picker with calendar and year grid views. It supports customizable date ranges, disabled dates, week numbers, and full keyboard navigation.
+
+## Installation
+
+```bash
+npm install app-datepicker
+```
+
+## Import
+
+```javascript
+import 'app-datepicker/app-date-picker';
+```
+
+Or import from specific path:
+
+```javascript
+import 'app-datepicker/dist/date-picker/app-date-picker.js';
+```
+
+## Usage
+
+<CodeGroup>
+```html Basic
+<app-date-picker></app-date-picker>
+```
+
+```html With Value
+<app-date-picker value="2024-12-25"></app-date-picker>
+```
+
+```html With Date Range
+<app-date-picker
+  min="2024-01-01"
+  max="2024-12-31"
+  value="2024-06-15"
+></app-date-picker>
+```
+
+```html With Week Numbers
+<app-date-picker
+  show-week-number
+  first-day-of-week="1"
+></app-date-picker>
+```
+
+```html Disabled Dates
+<app-date-picker
+  disabled-dates="2024-12-25,2024-12-26"
+  disabled-days="0,6"
+></app-date-picker>
+```
+</CodeGroup>
+
+## Properties
+
+<ParamField path="value" type="string" default="today">
+  Selected date in ISO 8601 format (yyyy-MM-dd), e.g. `2024-02-02`. Can also accept full ISO format like `2024-02-02T00:00:00.000Z`.
+</ParamField>
+
+<ParamField path="min" type="string" default="1970-01-01">
+  Minimum selectable date. When not set or undefined, defaults to `1970-01-01`. Accepts ISO 8601 format.
+</ParamField>
+
+<ParamField path="max" type="string" default="2100-12-31">
+  Maximum selectable date. When not set or undefined, defaults to `2100-12-31`. Accepts ISO 8601 format.
+</ParamField>
+
+<ParamField path="locale" type="string" default="system default">
+  ISO 639 language code for localization, e.g. `en-US`, `fr-FR`, `ja-JP`. Defaults to system locale.
+</ParamField>
+
+<ParamField path="firstDayOfWeek" type="number" default="0">
+  First day of the week (0-6, where 0 is Sunday). Accepts values between 0 and 6 inclusive.
+</ParamField>
+
+<ParamField path="showWeekNumber" type="boolean" default="false">
+  When true, displays a column of week numbers on the left side of the calendar.
+</ParamField>
+
+<ParamField path="weekNumberType" type="string" default="first-4-day-week">
+  How week numbers are calculated. Options:
+  - `first-4-day-week` - ISO 8601 week numbering
+  - `first-day-of-year` - Week 1 starts January 1
+  - `first-full-week` - First complete week is week 1
+</ParamField>
+
+<ParamField path="startView" type="string" default="calendar">
+  Initial view to render. Options: `calendar` or `yearGrid`.
+</ParamField>
+
+<ParamField path="disabledDates" type="string" default="">
+  Comma-separated dates to disable. Accepts ISO 8601 format: `2024-02-02,2024-12-25`.
+</ParamField>
+
+<ParamField path="disabledDays" type="string" default="">
+  Comma-separated days of week to disable (0-6). Example: `0,6` disables weekends.
+</ParamField>
+
+### Label Properties
+
+<ParamField path="todayLabel" type="string" default="Today">
+  Tooltip text for today's date in the calendar.
+</ParamField>
+
+<ParamField path="selectedDateLabel" type="string" default="Selected date">
+  Tooltip text for the selected date.
+</ParamField>
+
+<ParamField path="nextMonthLabel" type="string" default="Next month">
+  Tooltip for next month navigation button.
+</ParamField>
+
+<ParamField path="previousMonthLabel" type="string" default="Previous month">
+  Tooltip for previous month navigation button.
+</ParamField>
+
+<ParamField path="chooseYearLabel" type="string" default="Choose year">
+  Tooltip for year dropdown button in calendar view.
+</ParamField>
+
+<ParamField path="chooseMonthLabel" type="string" default="Choose month">
+  Tooltip for month dropdown button in year grid view.
+</ParamField>
+
+<ParamField path="selectedYearLabel" type="string" default="Selected year">
+  Tooltip for selected year in year grid.
+</ParamField>
+
+<ParamField path="toyearLabel" type="string" default="Toyear">
+  Tooltip for current year in year grid.
+</ParamField>
+
+<ParamField path="weekLabel" type="string" default="Week">
+  Tooltip for week number column header.
+</ParamField>
+
+<ParamField path="shortWeekLabel" type="string" default="Wk">
+  Abbreviated label for week number column header.
+</ParamField>
+
+<ParamField path="weekNumberTemplate" type="string" default="Week %s">
+  Template for week number tooltips. `%s` is replaced with week number.
+</ParamField>
+
+### Read-only Properties
+
+<ParamField path="valueAsDate" type="Date" readonly>
+  Selected date as JavaScript Date object, e.g. `new Date('2024-02-02')`.
+</ParamField>
+
+<ParamField path="valueAsNumber" type="number" readonly>
+  Selected date in milliseconds since ECMAScript epoch.
+</ParamField>
+
+## Events
+
+### date-updated
+
+Fires when the selected date changes.
+
+```typescript
+interface DateUpdatedDetail {
+  isKeypress: boolean;
+  value: string;           // ISO 8601 format: "2024-02-02"
+  valueAsDate: Date;
+  valueAsNumber: number;
+  key?: string;            // Present if triggered by keyboard
+}
+```
+
+```javascript
+datePicker.addEventListener('date-updated', (event) => {
+  console.log('Selected date:', event.detail.value);
+  console.log('As Date:', event.detail.valueAsDate);
+  console.log('Keyboard?', event.detail.isKeypress);
+});
+```
+
+### first-updated
+
+Fires when the picker completes its first render.
+
+```typescript
+interface FirstUpdatedDetail {
+  focusableElements: HTMLElement[];
+  value: string;
+  valueAsDate: Date;
+  valueAsNumber: number;
+}
+```
+
+```javascript
+datePicker.addEventListener('first-updated', (event) => {
+  console.log('Initial value:', event.detail.value);
+  console.log('Focusable elements:', event.detail.focusableElements);
+});
+```
+
+### year-updated
+
+Fires when the selected year changes in the year grid view.
+
+```typescript
+interface YearUpdatedDetail {
+  year: number;
+}
+```
+
+```javascript
+datePicker.addEventListener('year-updated', (event) => {
+  console.log('Selected year:', event.detail.year);
+});
+```
+
+## CSS Custom Properties
+
+### Theme Colors
+
+<ParamField path="--app-primary" type="color" default="#6200ee">
+  Primary background color.
+</ParamField>
+
+<ParamField path="--app-on-primary" type="color" default="#fff">
+  Text color on primary background.
+</ParamField>
+
+<ParamField path="--app-surface" type="color" default="#fff">
+  Background color of picker surface.
+</ParamField>
+
+<ParamField path="--app-on-surface" type="color" default="#000">
+  Text color on surface.
+</ParamField>
+
+### State Colors
+
+<ParamField path="--app-hover" type="color" default="#6200ee">
+  Border color for hover state.
+</ParamField>
+
+<ParamField path="--app-on-hover" type="color" default="#000">
+  Text color for hover state.
+</ParamField>
+
+<ParamField path="--app-focus" type="color" default="#000">
+  Border color for focus state.
+</ParamField>
+
+<ParamField path="--app-on-focus" type="color" default="#000">
+  Text color for focus state.
+</ParamField>
+
+<ParamField path="--app-on-disabled" type="color" default="rgba(0, 0, 0, .38)">
+  Text color for disabled state.
+</ParamField>
+
+<ParamField path="--app-selected-hover" type="color" default="#6200ee">
+  Border color when selected and hovered.
+</ParamField>
+
+<ParamField path="--app-selected-on-hover" type="color" default="#fff">
+  Text color when selected and hovered.
+</ParamField>
+
+<ParamField path="--app-selected-focus" type="color" default="#000">
+  Border color when selected and focused.
+</ParamField>
+
+<ParamField path="--app-selected-on-focus" type="color" default="#fff">
+  Text color when selected and focused.
+</ParamField>
+
+### Today & Special States
+
+<ParamField path="--app-today" type="color" default="#000">
+  Border color of today's date.
+</ParamField>
+
+<ParamField path="--app-on-today" type="color" default="#000">
+  Text color of today's date.
+</ParamField>
+
+<ParamField path="--app-on-weekday" type="color" default="#8c8c8c">
+  Text color for weekday headers.
+</ParamField>
+
+<ParamField path="--app-on-week-number" type="color" default="#8c8c8c">
+  Text color for week numbers.
+</ParamField>
+
+### Sizing
+
+<ParamField path="--app-shape" type="dimension" default="4px">
+  Border radius of the picker.
+</ParamField>
+
+<ParamField path="--date-picker-min-width" type="dimension" default="calc((16px * 2) + (32px * 7))">
+  Minimum width of picker.
+</ParamField>
+
+<ParamField path="--date-picker-mx-width" type="dimension" default="calc((16px * 2) + (32px * 7))">
+  Maximum width of picker.
+</ParamField>
+
+<ParamField path="--date-picker-min-height" type="dimension" default="calc(52px + 4px + (32px * 7))">
+  Minimum height of picker.
+</ParamField>
+
+<ParamField path="--date-picker-max-height" type="dimension" default="calc(52px + 4px + (32px * 7))">
+  Maximum height of picker.
+</ParamField>
+
+## CSS Shadow Parts
+
+Use `::part()` to style internal elements:
+
+```css
+app-date-picker::part(header) {
+  background: var(--custom-header-bg);
+}
+
+app-date-picker::part(calendar-day) {
+  font-weight: bold;
+}
+
+app-date-picker::part(today) {
+  border-color: red;
+}
+```
+
+### Available Parts
+
+- `header` - Picker header containing month/year selector
+- `body` - Picker body (calendar or year-grid)
+- `calendar` - Calendar container
+- `table` - Calendar table
+- `caption` - Calendar caption
+- `weekdays` - Weekday headers row
+- `weekday` - Individual weekday header cell
+- `weekday-value` - Weekday text content
+- `week-number` - Week number cell
+- `calendar-day` - Calendar day cell
+- `today` - Today's date
+- `year-grid` - Year grid container
+- `year` - Year button
+- `toyear` - Current year
+
+## Keyboard Navigation
+
+### Calendar View
+
+- **Arrow Keys** - Navigate between dates
+- **Home** - First day of current week
+- **End** - Last day of current week
+- **Page Up** - Previous month
+- **Page Down** - Next month
+- **Alt + Page Up** - Previous year
+- **Alt + Page Down** - Next year
+- **Enter / Space** - Select focused date
+- **Tab** - Move to next focusable element
+
+### Year Grid View
+
+- **Arrow Keys** - Navigate between years
+- **Home** - First year in range
+- **End** - Last year in range
+- **Enter / Space** - Select year and return to calendar
+
+## Example: JavaScript Integration
+
+```javascript
+const datePicker = document.querySelector('app-date-picker');
+
+// Set date programmatically
+datePicker.value = '2024-12-25';
+
+// Get date as Date object
+console.log(datePicker.valueAsDate);
+
+// Get date as timestamp
+console.log(datePicker.valueAsNumber);
+
+// Listen for changes
+datePicker.addEventListener('date-updated', (e) => {
+  console.log('New date:', e.detail.value);
+});
+
+// Set date range
+datePicker.min = '2024-01-01';
+datePicker.max = '2024-12-31';
+
+// Disable weekends
+datePicker.disabledDays = '0,6';
+
+// Change locale
+datePicker.locale = 'fr-FR';
+```
+
+## TypeScript
+
+```typescript
+import type { AppDatePicker } from 'app-datepicker/app-date-picker';
+
+const datePicker = document.querySelector('app-date-picker') as AppDatePicker;
+
+if (datePicker) {
+  datePicker.value = '2024-12-25';
+  const date: Date = datePicker.valueAsDate;
+}
+```

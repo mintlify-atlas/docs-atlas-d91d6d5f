@@ -1,0 +1,345 @@
+---
+title: Basic Usage
+description: Learn how to import and use app-datepicker components in your application
+---
+
+## Component Variants
+
+app-datepicker provides three main component variants, each optimized for different use cases:
+
+<CardGroup cols={3}>
+  <Card title="date-picker" icon="calendar">
+    Standalone calendar picker component
+  </Card>
+  <Card title="date-picker-dialog" icon="window-maximize">
+    Calendar picker inside a modal dialog
+  </Card>
+  <Card title="date-picker-input" icon="input-text">
+    Text field with integrated calendar picker
+  </Card>
+</CardGroup>
+
+## Installation
+
+<CodeGroup>
+```bash npm
+npm install app-datepicker
+```
+
+```bash yarn
+yarn add app-datepicker
+```
+
+```bash pnpm
+pnpm add app-datepicker
+```
+</CodeGroup>
+
+## Importing Components
+
+### Basic Date Picker
+
+The `app-date-picker` component renders a standalone calendar interface.
+
+```typescript
+import 'app-datepicker/dist/date-picker/app-date-picker.js';
+
+// In your HTML or Lit template
+const template = html`
+  <app-date-picker></app-date-picker>
+`;
+```
+
+```html
+<!-- Direct HTML usage -->
+<app-date-picker></app-date-picker>
+```
+
+### Date Picker Dialog
+
+The `app-date-picker-dialog` wraps the calendar in a Material Design dialog with action buttons.
+
+```typescript
+import 'app-datepicker/dist/date-picker-dialog/app-date-picker-dialog.js';
+
+const template = html`
+  <app-date-picker-dialog
+    .open=${true}
+    confirmLabel="OK"
+    dismissLabel="Cancel"
+    resetLabel="Clear"
+  ></app-date-picker-dialog>
+`;
+```
+
+<Note>
+  The dialog component requires Material Web Components (`@material/mwc-dialog` and `@material/mwc-button`) as peer dependencies.
+</Note>
+
+### Date Picker Input
+
+The `app-date-picker-input` provides a text field that opens a calendar picker when clicked.
+
+```typescript
+import 'app-datepicker/dist/date-picker-input/app-date-picker-input.js';
+
+const template = html`
+  <app-date-picker-input
+    label="Select Date"
+    value="2024-03-15"
+  ></app-date-picker-input>
+`;
+```
+
+<Tip>
+  The input component extends Material Web Components' `TextField`, inheriting all its styling and functionality.
+</Tip>
+
+## Setting Values
+
+All components share the same value interface:
+
+<Tabs>
+  <Tab title="String Value">
+    ```typescript
+    // Set value as ISO date string (YYYY-MM-DD)
+    picker.value = '2024-03-15';
+    ```
+  </Tab>
+  <Tab title="Date Object">
+    ```typescript
+    // Read value as Date object
+    const dateValue = picker.valueAsDate;
+    console.log(dateValue); // Date object
+    ```
+  </Tab>
+  <Tab title="Timestamp">
+    ```typescript
+    // Read value as timestamp
+    const timestamp = picker.valueAsNumber;
+    console.log(timestamp); // Unix timestamp in milliseconds
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  The `value` property must be in `YYYY-MM-DD` format. Setting `null` or empty string resets to the last valid date. To reset to today's date, set `value = undefined`.
+</Warning>
+
+## Common Properties
+
+These properties are available on all three components:
+
+### Date Range
+
+```typescript
+// Set minimum and maximum selectable dates
+picker.min = '2024-01-01';
+picker.max = '2024-12-31';
+```
+
+### Start View
+
+```typescript
+// Control initial view: 'calendar' (default) or 'yearGrid'
+picker.startView = 'calendar';  // Shows month calendar
+picker.startView = 'yearGrid';  // Shows year selector
+```
+
+<Accordion title="View the full startView source code">
+  From `src/constants.ts:22`:
+  ```typescript
+  export const startViews = ['calendar', 'yearGrid'] as const;
+  ```
+</Accordion>
+
+### Week Numbers
+
+```typescript
+// Display ISO week numbers
+picker.showWeekNumber = true;
+picker.weekNumberType = 'first-4-day-week'; // ISO 8601 standard
+```
+
+## Event Handling
+
+### Date Updated Event
+
+Fired when the user selects a date:
+
+```typescript
+picker.addEventListener('date-updated', (event) => {
+  const { value, valueAsDate, valueAsNumber, isKeypress, key } = event.detail;
+  
+  console.log('Selected date:', value);        // '2024-03-15'
+  console.log('As Date object:', valueAsDate); // Date object
+  console.log('As timestamp:', valueAsNumber); // Unix timestamp
+  console.log('Via keyboard:', isKeypress);    // true/false
+  console.log('Key pressed:', key);             // Key name if keyboard
+});
+```
+
+<Accordion title="View event type definition">
+  From `src/typings.ts:18-23`:
+  ```typescript
+  export interface CustomEventDetail {
+    ['date-updated']: CustomEventAction<'date-updated', CustomEventDetailDateUpdated>;
+    ['first-updated']: CustomEventAction<'first-updated', CustomEventDetailFirstUpdated>;
+    ['year-updated']: CustomEventAction<'year-updated', CustomEventDetailYearUpdated>;
+  }
+
+  interface CustomEventDetailDateUpdated extends KeyEvent, DatePickerValues {}
+  ```
+</Accordion>
+
+### First Updated Event
+
+Fired once when the component first renders:
+
+```typescript
+picker.addEventListener('first-updated', (event) => {
+  const { value, valueAsDate, valueAsNumber, focusableElements } = event.detail;
+  
+  console.log('Initial value:', value);
+  console.log('Focusable elements:', focusableElements);
+});
+```
+
+### Dialog-Specific Events
+
+For `app-date-picker-dialog` only:
+
+```typescript
+dialog.addEventListener('opening', () => {
+  console.log('Dialog is opening');
+});
+
+dialog.addEventListener('opened', () => {
+  console.log('Dialog opened');
+});
+
+dialog.addEventListener('closing', (event) => {
+  console.log('Dialog closing with action:', event.detail.action);
+  // action can be 'set', 'cancel', or 'reset'
+});
+
+dialog.addEventListener('closed', () => {
+  console.log('Dialog closed');
+});
+```
+
+### Input-Specific Events
+
+For `app-date-picker-input` only:
+
+```typescript
+input.addEventListener('opened', () => {
+  console.log('Picker surface opened');
+});
+
+input.addEventListener('closed', () => {
+  console.log('Picker surface closed');
+});
+```
+
+## Programmatic Control
+
+### Dialog Methods
+
+```typescript
+// Show the dialog
+dialog.show();
+
+// Hide the dialog
+dialog.hide();
+
+// Check if open
+if (dialog.open) {
+  console.log('Dialog is visible');
+}
+```
+
+### Input Methods
+
+```typescript
+// Open the picker programmatically
+input.showPicker();
+
+// Close the picker
+input.closePicker();
+
+// Reset to empty value
+input.reset();
+```
+
+## Complete Example
+
+Here's a complete example using Lit:
+
+```typescript
+import { LitElement, html, css } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import 'app-datepicker/dist/date-picker/app-date-picker.js';
+
+@customElement('my-date-app')
+export class MyDateApp extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      padding: 16px;
+    }
+    
+    app-date-picker {
+      --app-primary: #6200ee;
+      --app-on-primary: #fff;
+    }
+  `;
+
+  @state()
+  private selectedDate = '';
+
+  private handleDateUpdate(event: CustomEvent) {
+    this.selectedDate = event.detail.value;
+    console.log('New date selected:', this.selectedDate);
+  }
+
+  render() {
+    return html`
+      <h2>Select a Date</h2>
+      
+      <app-date-picker
+        value="2024-03-15"
+        min="2024-01-01"
+        max="2024-12-31"
+        .showWeekNumber=${true}
+        @date-updated=${this.handleDateUpdate}
+      ></app-date-picker>
+      
+      ${this.selectedDate ? html`
+        <p>Selected: ${this.selectedDate}</p>
+      ` : ''}
+    `;
+  }
+}
+```
+
+<Tip>
+  Always use the `.property=${value}` syntax in Lit templates for boolean and object properties to ensure proper binding.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Localization" icon="globe" href="/guides/localization">
+    Learn how to localize the date picker for different languages and regions
+  </Card>
+  <Card title="Styling" icon="palette" href="/guides/styling">
+    Customize the appearance with CSS custom properties
+  </Card>
+  <Card title="Advanced Features" icon="wand-magic-sparkles" href="/guides/advanced-features">
+    Explore disabled dates, week numbers, and custom formatters
+  </Card>
+  <Card title="API Reference" icon="book" href="/api/date-picker">
+    View complete API documentation
+  </Card>
+</CardGroup>

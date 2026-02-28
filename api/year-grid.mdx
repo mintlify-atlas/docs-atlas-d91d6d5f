@@ -1,0 +1,360 @@
+---
+title: 'app-year-grid'
+description: 'Year grid component for selecting years in a scrollable grid'
+---
+
+## Overview
+
+The `app-year-grid` component displays a scrollable grid of years for quick year selection. It's used internally by `app-date-picker` but can also be used standalone for custom implementations.
+
+## Installation
+
+```bash
+npm install app-datepicker
+```
+
+## Import
+
+```javascript
+import 'app-datepicker/app-year-grid';
+```
+
+Or import from specific path:
+
+```javascript
+import 'app-datepicker/dist/year-grid/app-year-grid.js';
+```
+
+## Usage
+
+<Note>
+This is a low-level component. Most use cases should use [app-date-picker](/api/app-date-picker) instead.
+</Note>
+
+```html
+<app-year-grid></app-year-grid>
+
+<script type="module">
+  import 'app-datepicker/app-year-grid';
+  
+  const yearGrid = document.querySelector('app-year-grid');
+  const currentDate = new Date();
+  
+  yearGrid.data = {
+    date: currentDate,
+    formatters: {
+      yearFormat: (date) => 
+        new Intl.DateTimeFormat('en-US', { year: 'numeric' }).format(date)
+    },
+    max: new Date('2100-12-31'),
+    min: new Date('1970-01-01'),
+    selectedYearLabel: 'Selected year',
+    toyearLabel: 'Current year',
+  };
+  
+  yearGrid.addEventListener('year-updated', (e) => {
+    console.log('Year selected:', e.detail.year);
+  });
+</script>
+```
+
+## Properties
+
+<ParamField path="data" type="YearGridData">
+  Year grid data object containing all necessary information to render the grid.
+  
+  ```typescript
+  interface YearGridData {
+    date: Date;                    // Currently selected date
+    formatters: Formatters;        // Date formatting functions
+    max: Date;                     // Maximum year boundary
+    min: Date;                     // Minimum year boundary
+    selectedYearLabel: string;     // Label for selected year
+    toyearLabel: string;           // Label for current year
+  }
+  ```
+</ParamField>
+
+<ParamField path="selectedYearGridButton" type="Promise<HTMLButtonElement | null>" readonly>
+  Async query for the currently selected year button element.
+  
+  ```javascript
+  const selectedButton = await yearGrid.selectedYearGridButton;
+  if (selectedButton) {
+    console.log('Selected year:', selectedButton.getAttribute('data-year'));
+  }
+  ```
+</ParamField>
+
+<ParamField path="yearGrid" type="Promise<HTMLDivElement | null>" readonly>
+  Async query for the year grid container element.
+  
+  ```javascript
+  const container = await yearGrid.yearGrid;
+  ```
+</ParamField>
+
+## Events
+
+### year-updated
+
+Fires when a year is selected (clicked or via keyboard).
+
+```typescript
+interface YearUpdatedDetail {
+  year: number;    // Selected year as a number, e.g. 2024
+}
+```
+
+```javascript
+yearGrid.addEventListener('year-updated', (event) => {
+  console.log('Selected year:', event.detail.year);
+  
+  // Use the year to update other components
+  const newDate = new Date(event.detail.year, 0, 1);
+  console.log('First day of year:', newDate);
+});
+```
+
+## CSS Shadow Parts
+
+```css
+app-year-grid::part(year-grid) {
+  /* Grid container */
+  padding: 8px;
+}
+
+app-year-grid::part(year) {
+  /* Year button */
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+app-year-grid::part(toyear) {
+  /* Current year */
+  border: 2px solid currentColor;
+  font-weight: bold;
+}
+```
+
+### Available Parts
+
+- `year-grid` - Main grid container
+- `year` - Individual year button
+- `toyear` - Current year button
+
+## Keyboard Navigation
+
+- **Arrow Up** - Previous row (4 years earlier)
+- **Arrow Down** - Next row (4 years later)
+- **Arrow Left** - Previous year
+- **Arrow Right** - Next year
+- **Home** - First year in range (min)
+- **End** - Last year in range (max)
+- **Page Up** - Previous page (12 years earlier)
+- **Page Down** - Next page (12 years later)
+- **Enter / Space** - Select focused year (native button behavior)
+
+## Methods
+
+<ParamField path="$renderButton(init)" type="method" protected>
+  Protected method for rendering individual year buttons. Can be overridden for customization.
+  
+  ```typescript
+  interface YearGridRenderButtonInit {
+    ariaLabel: string;
+    ariaSelected: 'true' | 'false';
+    className: string;
+    part: string;
+    tabIndex: number;
+    title?: string;
+    year: number;
+  }
+  ```
+</ParamField>
+
+## Example: Custom Year Range
+
+```javascript
+import 'app-datepicker/app-year-grid';
+
+const yearGrid = document.querySelector('app-year-grid');
+const currentYear = new Date().getFullYear();
+
+// Limit to 10 years forward and backward
+yearGrid.data = {
+  date: new Date(),
+  formatters: {
+    yearFormat: (date) => date.getUTCFullYear().toString()
+  },
+  max: new Date(`${currentYear + 10}-12-31`),
+  min: new Date(`${currentYear - 10}-01-01`),
+  selectedYearLabel: 'Selected year',
+  toyearLabel: 'This year',
+};
+
+yearGrid.addEventListener('year-updated', (e) => {
+  console.log(`User selected: ${e.detail.year}`);
+  
+  // Validate selection
+  if (e.detail.year > currentYear + 5) {
+    alert('Please select a year within 5 years from now');
+  }
+});
+```
+
+## Example: Styled Year Grid
+
+```html
+<style>
+  app-year-grid {
+    --app-primary: #1976d2;
+    --app-on-primary: white;
+  }
+  
+  app-year-grid::part(year-grid) {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  app-year-grid::part(year) {
+    padding: 12px;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  
+  app-year-grid::part(year):hover {
+    background: rgba(25, 118, 210, 0.1);
+  }
+  
+  app-year-grid::part(toyear) {
+    background: #e3f2fd;
+    border: 2px solid #1976d2;
+    font-weight: 600;
+  }
+</style>
+
+<app-year-grid></app-year-grid>
+```
+
+## Example: Integration with Date Picker
+
+```javascript
+import 'app-datepicker/app-year-grid';
+import 'app-datepicker/app-month-calendar';
+
+class CustomDatePicker extends HTMLElement {
+  #selectedDate = new Date();
+  #view = 'calendar'; // 'calendar' or 'yearGrid'
+  
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+  
+  connectedCallback() {
+    this.render();
+    this.setupEventListeners();
+  }
+  
+  render() {
+    this.shadowRoot.innerHTML = `
+      <button id="toggle-view">Switch to Year Grid</button>
+      <div id="calendar-view"></div>
+      <div id="year-view" style="display: none;">
+        <app-year-grid></app-year-grid>
+      </div>
+    `;
+  }
+  
+  setupEventListeners() {
+    const yearGrid = this.shadowRoot.querySelector('app-year-grid');
+    const toggleBtn = this.shadowRoot.getElementById('toggle-view');
+    
+    yearGrid.data = {
+      date: this.#selectedDate,
+      formatters: {
+        yearFormat: (date) => date.getUTCFullYear().toString()
+      },
+      max: new Date('2100-12-31'),
+      min: new Date('1970-01-01'),
+      selectedYearLabel: 'Selected year',
+      toyearLabel: 'Current year',
+    };
+    
+    yearGrid.addEventListener('year-updated', (e) => {
+      // Update selected date with new year
+      this.#selectedDate.setUTCFullYear(e.detail.year);
+      
+      // Switch back to calendar view
+      this.#view = 'calendar';
+      this.updateView();
+    });
+    
+    toggleBtn.addEventListener('click', () => {
+      this.#view = this.#view === 'calendar' ? 'yearGrid' : 'calendar';
+      this.updateView();
+    });
+  }
+  
+  updateView() {
+    const calendarView = this.shadowRoot.getElementById('calendar-view');
+    const yearView = this.shadowRoot.getElementById('year-view');
+    const toggleBtn = this.shadowRoot.getElementById('toggle-view');
+    
+    if (this.#view === 'yearGrid') {
+      calendarView.style.display = 'none';
+      yearView.style.display = 'block';
+      toggleBtn.textContent = 'Switch to Calendar';
+    } else {
+      calendarView.style.display = 'block';
+      yearView.style.display = 'none';
+      toggleBtn.textContent = 'Switch to Year Grid';
+    }
+  }
+}
+
+customElements.define('custom-date-picker', CustomDatePicker);
+```
+
+## TypeScript
+
+```typescript
+import type { AppYearGrid } from 'app-datepicker/app-year-grid';
+import type { YearGridData } from 'app-datepicker/year-grid/typings';
+
+const yearGrid = document.querySelector('app-year-grid') as AppYearGrid;
+
+const data: YearGridData = {
+  date: new Date(),
+  formatters: {
+    yearFormat: (date: Date) => date.getUTCFullYear().toString()
+  },
+  max: new Date('2100-12-31'),
+  min: new Date('1970-01-01'),
+  selectedYearLabel: 'Selected year',
+  toyearLabel: 'Current year',
+};
+
+yearGrid.data = data;
+
+yearGrid.addEventListener('year-updated', (e) => {
+  const year: number = e.detail.year;
+  console.log(`Selected: ${year}`);
+});
+```
+
+## Behavior Notes
+
+- The grid displays years in a 4-column layout by default
+- Automatically scrolls to show the selected/focused year
+- Years are displayed in ascending order (oldest to newest)
+- The grid shows all years between `min` and `max` dates
+- Uses semantic `<button>` elements for accessibility
+- Prevents event propagation to work properly within dialogs
+- Each button has `tabindex="0"` for the focused year, `-1` for others
+- The component automatically calculates scroll position based on the selected year

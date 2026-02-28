@@ -1,0 +1,578 @@
+---
+title: Helper Functions
+description: Utility helper functions for date manipulation and component functionality
+---
+
+The app-datepicker library provides a comprehensive set of helper functions for date manipulation, validation, and calendar operations. These utilities are used internally by the components and can also be imported for custom use cases.
+
+## Date Validation
+
+### dateValidator
+
+Validates a date value and returns validation result with a fallback date.
+
+```typescript
+function dateValidator(value: MaybeDate, defaultDate: Date): DateValidatorResult
+```
+
+<ParamField path="value" type="MaybeDate">
+  The date value to validate (can be Date, string, number, or null)
+</ParamField>
+
+<ParamField path="defaultDate" type="Date">
+  Fallback date to return if validation fails
+</ParamField>
+
+<ResponseField name="date" type="Date">
+  The validated date or the default date if invalid
+</ResponseField>
+
+<ResponseField name="isValid" type="boolean">
+  Whether the input date was valid
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { dateValidator } from 'app-datepicker/helpers/date-validator.js';
+
+const result = dateValidator('2024-01-15', new Date());
+console.log(result.isValid); // true
+console.log(result.date); // Date object for 2024-01-15
+
+const invalid = dateValidator('invalid', new Date());
+console.log(invalid.isValid); // false
+console.log(invalid.date); // Today's date (fallback)
+```
+
+---
+
+## Date Conversion
+
+### toResolvedDate
+
+Converts various date formats to a normalized UTC Date object.
+
+```typescript
+function toResolvedDate(date?: MaybeDate): Date
+```
+
+<ParamField path="date" type="MaybeDate" default="undefined">
+  The date value to resolve. If undefined, returns today's date
+</ParamField>
+
+Returns a normalized UTC Date object. Handles:
+- ISO date strings (e.g., "2024-01-15")
+- Unix timestamps
+- Date objects
+- Numeric strings
+
+**Example:**
+
+```typescript
+import { toResolvedDate } from 'app-datepicker/helpers/to-resolved-date.js';
+
+const date1 = toResolvedDate('2024-01-15');
+const date2 = toResolvedDate(1705276800000);
+const date3 = toResolvedDate(); // Today's date
+```
+
+### toDateString
+
+Converts a Date object to ISO date string format (YYYY-MM-DD).
+
+```typescript
+function toDateString(date: Date): string
+```
+
+<ParamField path="date" type="Date" required>
+  The date to convert to string
+</ParamField>
+
+Returns ISO date string in YYYY-MM-DD format.
+
+**Example:**
+
+```typescript
+import { toDateString } from 'app-datepicker/helpers/to-date-string.js';
+
+const dateStr = toDateString(new Date('2024-01-15T12:00:00Z'));
+console.log(dateStr); // "2024-01-15"
+```
+
+---
+
+## Date Calculations
+
+### toDayDiffInclusive
+
+Calculates the number of days between two dates (inclusive).
+
+```typescript
+function toDayDiffInclusive(min: Date | number, max: Date | number): number
+```
+
+<ParamField path="min" type="Date | number" required>
+  Start date (Date object or timestamp)
+</ParamField>
+
+<ParamField path="max" type="Date | number" required>
+  End date (Date object or timestamp)
+</ParamField>
+
+Returns the number of days in the range (inclusive). Minimum return value is 1.
+
+**Example:**
+
+```typescript
+import { toDayDiffInclusive } from 'app-datepicker/helpers/to-day-diff-inclusive.js';
+
+const start = new Date('2024-01-01');
+const end = new Date('2024-01-10');
+const days = toDayDiffInclusive(start, end);
+console.log(days); // 10
+```
+
+### isInCurrentMonth
+
+Checks if a target date is in the same month and year as a source date.
+
+```typescript
+function isInCurrentMonth(targetDate: Date, sourceDate: Date): boolean
+```
+
+<ParamField path="targetDate" type="Date" required>
+  The date to check
+</ParamField>
+
+<ParamField path="sourceDate" type="Date" required>
+  The reference date
+</ParamField>
+
+**Example:**
+
+```typescript
+import { isInCurrentMonth } from 'app-datepicker/helpers/is-in-current-month.js';
+
+const target = new Date('2024-01-15');
+const reference = new Date('2024-01-20');
+console.log(isInCurrentMonth(target, reference)); // true
+
+const different = new Date('2024-02-15');
+console.log(isInCurrentMonth(different, reference)); // false
+```
+
+---
+
+## Formatting and Internationalization
+
+### toFormatters
+
+Creates a complete set of internationalized date formatters for a given locale.
+
+```typescript
+function toFormatters(locale: string): Formatters
+```
+
+<ParamField path="locale" type="string" required>
+  BCP 47 language tag (e.g., "en-US", "fr-FR")
+</ParamField>
+
+<ResponseField name="locale" type="string">
+  The locale string
+</ResponseField>
+
+<ResponseField name="dateFormat" type="DateTimeFormatter">
+  Formats dates with weekday, month, and day (e.g., "Mon, Jan 15")
+</ResponseField>
+
+<ResponseField name="dayFormat" type="DateTimeFormatter">
+  Formats day numbers (e.g., "15")
+</ResponseField>
+
+<ResponseField name="fullDateFormat" type="DateTimeFormatter">
+  Formats complete dates (e.g., "Jan 15, 2024")
+</ResponseField>
+
+<ResponseField name="longMonthFormat" type="DateTimeFormatter">
+  Formats full month names (e.g., "January")
+</ResponseField>
+
+<ResponseField name="longMonthYearFormat" type="DateTimeFormatter">
+  Formats month and year (e.g., "January 2024")
+</ResponseField>
+
+<ResponseField name="longWeekdayFormat" type="DateTimeFormatter">
+  Formats full weekday names (e.g., "Monday")
+</ResponseField>
+
+<ResponseField name="narrowWeekdayFormat" type="DateTimeFormatter">
+  Formats single-letter weekdays (e.g., "M")
+</ResponseField>
+
+<ResponseField name="yearFormat" type="DateTimeFormatter">
+  Formats years (e.g., "2024")
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { toFormatters } from 'app-datepicker/helpers/to-formatters.js';
+
+const formatters = toFormatters('en-US');
+const date = new Date('2024-01-15');
+
+console.log(formatters.fullDateFormat(date)); // "Jan 15, 2024"
+console.log(formatters.longMonthFormat(date)); // "January"
+console.log(formatters.longWeekdayFormat(date)); // "Monday"
+```
+
+---
+
+## Calendar Generation
+
+### toMultiCalendars
+
+Generates calendar data for multiple months with proper date validation.
+
+```typescript
+function toMultiCalendars(options: ToMultiCalendarsInit): MultiCalendars
+```
+
+<ParamField path="options" type="ToMultiCalendarsInit" required>
+  Configuration object for calendar generation
+</ParamField>
+
+<ParamField path="options.currentDate" type="Date" required>
+  The focal date for calendar generation
+</ParamField>
+
+<ParamField path="options.locale" type="string" required>
+  BCP 47 language tag
+</ParamField>
+
+<ParamField path="options.dayFormat" type="DateTimeFormatter" required>
+  Formatter for day numbers
+</ParamField>
+
+<ParamField path="options.fullDateFormat" type="DateTimeFormatter" required>
+  Formatter for full dates
+</ParamField>
+
+<ParamField path="options.longWeekdayFormat" type="DateTimeFormatter" required>
+  Formatter for weekday names
+</ParamField>
+
+<ParamField path="options.narrowWeekdayFormat" type="DateTimeFormatter" required>
+  Formatter for narrow weekday labels
+</ParamField>
+
+<ParamField path="options.count" type="number">
+  Number of months to generate (defaults to 1, always becomes odd number)
+</ParamField>
+
+<ParamField path="options.min" type="Date">
+  Minimum selectable date
+</ParamField>
+
+<ParamField path="options.max" type="Date">
+  Maximum selectable date
+</ParamField>
+
+<ParamField path="options.disabledDates" type="string">
+  Comma-separated list of disabled dates
+</ParamField>
+
+<ParamField path="options.disabledDays" type="string">
+  Comma-separated list of disabled weekdays (0-6)
+</ParamField>
+
+<ParamField path="options.firstDayOfWeek" type="number">
+  First day of week (0 = Sunday, 1 = Monday, etc.)
+</ParamField>
+
+<ParamField path="options.showWeekNumber" type="boolean">
+  Whether to show week numbers
+</ParamField>
+
+<ParamField path="options.weekLabel" type="string">
+  Label for week number column
+</ParamField>
+
+<ParamField path="options.weekNumberType" type="WeekNumberType">
+  Type of week numbering system
+</ParamField>
+
+<ResponseField name="calendars" type="Array<Calendar>">
+  Array of calendar objects for each month
+</ResponseField>
+
+<ResponseField name="weekdays" type="CalendarWeekday[]">
+  Weekday header information
+</ResponseField>
+
+<ResponseField name="disabledDatesSet" type="Set<number>">
+  Set of disabled date timestamps
+</ResponseField>
+
+<ResponseField name="disabledDaysSet" type="Set<number>">
+  Set of disabled weekday numbers
+</ResponseField>
+
+<ResponseField name="key" type="string">
+  Unique key for the calendar configuration
+</ResponseField>
+
+---
+
+## Navigation Helpers
+
+### toNextSelectableDate
+
+Finds the next selectable date from a given date, respecting constraints.
+
+```typescript
+function toNextSelectableDate(init: ToNextSelectableDateInit): Date
+```
+
+<ParamField path="init.date" type="Date" required>
+  Starting date
+</ParamField>
+
+<ParamField path="init.key" type="SupportedKey" required>
+  Navigation key pressed (e.g., ArrowRight, ArrowDown)
+</ParamField>
+
+<ParamField path="init.minTime" type="number" required>
+  Minimum timestamp allowed
+</ParamField>
+
+<ParamField path="init.maxTime" type="number" required>
+  Maximum timestamp allowed
+</ParamField>
+
+<ParamField path="init.disabledDatesSet" type="Set<number>" required>
+  Set of disabled date timestamps
+</ParamField>
+
+<ParamField path="init.disabledDaysSet" type="Set<number>" required>
+  Set of disabled weekday numbers
+</ParamField>
+
+Returns the next selectable date in the navigation direction.
+
+---
+
+## List Generation
+
+### toYearList
+
+Generates an array of years between min and max dates.
+
+```typescript
+function toYearList(min: Date, max: Date): number[]
+```
+
+<ParamField path="min" type="Date" required>
+  Minimum date
+</ParamField>
+
+<ParamField path="max" type="Date" required>
+  Maximum date
+</ParamField>
+
+Returns array of years from min to max (inclusive).
+
+**Example:**
+
+```typescript
+import { toYearList } from 'app-datepicker/helpers/to-year-list.js';
+
+const years = toYearList(
+  new Date('2020-01-01'),
+  new Date('2024-12-31')
+);
+console.log(years); // [2020, 2021, 2022, 2023, 2024]
+```
+
+---
+
+## String Utilities
+
+### splitString
+
+Splits a string and optionally transforms each element.
+
+```typescript
+function splitString<ReturnType = string>(
+  source: string,
+  splitFunction?: SplitStringCallbackFn<ReturnType>,
+  separator: RegExp | string = /,\s*/
+): ReturnType[]
+```
+
+<ParamField path="source" type="string" required>
+  String to split
+</ParamField>
+
+<ParamField path="splitFunction" type="SplitStringCallbackFn<ReturnType>">
+  Optional transformation function for each element
+</ParamField>
+
+<ParamField path="separator" type="RegExp | string" default="/,\s*/">
+  Separator pattern (comma with optional space by default)
+</ParamField>
+
+**Example:**
+
+```typescript
+import { splitString } from 'app-datepicker/helpers/split-string.js';
+
+// Simple split
+const dates = splitString('2024-01-01, 2024-01-15, 2024-02-01');
+console.log(dates); // ['2024-01-01', '2024-01-15', '2024-02-01']
+
+// With transformation
+const timestamps = splitString(
+  '2024-01-01, 2024-01-15',
+  (dateStr) => new Date(dateStr).getTime()
+);
+```
+
+---
+
+## Utility Functions
+
+### clampValue
+
+Clamps a value between minimum and maximum bounds.
+
+```typescript
+function clampValue(min: number, max: number, value: number): number
+```
+
+<ParamField path="min" type="number" required>
+  Minimum value
+</ParamField>
+
+<ParamField path="max" type="number" required>
+  Maximum value
+</ParamField>
+
+<ParamField path="value" type="number" required>
+  Value to clamp
+</ParamField>
+
+**Example:**
+
+```typescript
+import { clampValue } from 'app-datepicker/helpers/clamp-value.js';
+
+console.log(clampValue(0, 100, 150)); // 100
+console.log(clampValue(0, 100, -10)); // 0
+console.log(clampValue(0, 100, 50)); // 50
+```
+
+### focusElement
+
+Focuses an element after resolving a promise.
+
+```typescript
+async function focusElement<T extends HTMLElement | null>(
+  asyncSelector: Promise<T>,
+  thenCallback?: (element: NonNullable<T>) => Promise<void> | void
+): Promise<T>
+```
+
+<ParamField path="asyncSelector" type="Promise<T>" required>
+  Promise that resolves to an HTML element
+</ParamField>
+
+<ParamField path="thenCallback" type="function">
+  Optional callback to execute after focusing
+</ParamField>
+
+**Example:**
+
+```typescript
+import { focusElement } from 'app-datepicker/helpers/focus-element.js';
+
+await focusElement(
+  Promise.resolve(document.querySelector('.date-button')),
+  (element) => {
+    element.scrollIntoView({ block: 'nearest' });
+  }
+);
+```
+
+### toClosestTarget
+
+Finds the closest ancestor element matching a selector from an event.
+
+```typescript
+function toClosestTarget<Target extends HTMLElement, TargetEvent extends Event = Event>(
+  event: TargetEvent,
+  selector: string
+): Target | undefined
+```
+
+<ParamField path="event" type="Event" required>
+  The event object
+</ParamField>
+
+<ParamField path="selector" type="string" required>
+  CSS selector to match
+</ParamField>
+
+**Example:**
+
+```typescript
+import { toClosestTarget } from 'app-datepicker/helpers/to-closest-target.js';
+
+element.addEventListener('click', (event) => {
+  const button = toClosestTarget<HTMLButtonElement>(event, 'button[data-date]');
+  if (button) {
+    console.log(button.dataset.date);
+  }
+});
+```
+
+### nullishAttributeConverter
+
+Attribute converter that converts falsy values to undefined for Lit elements.
+
+```typescript
+const nullishAttributeConverter: ComplexAttributeConverter['toAttribute']
+```
+
+**Example:**
+
+```typescript
+import { nullishAttributeConverter } from 'app-datepicker/helpers/nullish-attribute-converter.js';
+import { LitElement, html } from 'lit';
+import { property } from 'lit/decorators.js';
+
+class MyElement extends LitElement {
+  @property({ converter: { toAttribute: nullishAttributeConverter } })
+  max?: string;
+}
+```
+
+---
+
+## Import Paths
+
+All helper functions can be imported from their individual modules:
+
+```typescript
+import { dateValidator } from 'app-datepicker/helpers/date-validator.js';
+import { toFormatters } from 'app-datepicker/helpers/to-formatters.js';
+import { toMultiCalendars } from 'app-datepicker/helpers/to-multi-calendars.js';
+// ... etc
+```
+
+For TypeScript projects, corresponding type definitions are available:
+
+```typescript
+import type { DateValidatorResult, MaybeDate, MultiCalendars } from 'app-datepicker/helpers/typings.js';
+```

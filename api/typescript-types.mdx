@@ -1,0 +1,627 @@
+---
+title: TypeScript Types
+description: TypeScript type definitions and interfaces for type-safe date picker usage
+---
+
+The app-datepicker library is written in TypeScript and provides comprehensive type definitions. This page documents the key types and interfaces you'll use when working with the library in TypeScript projects.
+
+## Core Component Types
+
+### DatePickerProperties
+
+Complete type definition for all date picker properties.
+
+```typescript
+interface DatePickerProperties extends
+  DatePickerMinMaxProperties,
+  DatePickerMixinProperties,
+  ElementMixinProperties {}
+```
+
+This interface combines all property types for the main `<app-datepicker>` component. It includes:
+- Min/max date constraints
+- Localization and formatting options
+- Accessibility labels
+- Event handlers
+
+**Source:** `src/typings.ts:36-39`
+
+### DatePickerMinMaxProperties
+
+Properties for date range constraints.
+
+```typescript
+interface DatePickerMinMaxProperties {
+  max?: string;
+  min?: string;
+}
+```
+
+<ParamField path="min" type="string">
+  Minimum selectable date in ISO format (YYYY-MM-DD)
+</ParamField>
+
+<ParamField path="max" type="string">
+  Maximum selectable date in ISO format (YYYY-MM-DD)
+</ParamField>
+
+**Source:** `src/mixins/typings.ts:6-9`
+
+### DatePickerMixinProperties
+
+Core configuration properties for the date picker.
+
+```typescript
+interface DatePickerMixinProperties {
+  chooseMonthLabel: string;
+  chooseYearLabel: string;
+  disabledDates: string;
+  disabledDays: string;
+  firstDayOfWeek: number;
+  locale: string;
+  nextMonthLabel: string;
+  previousMonthLabel: string;
+  selectedDateLabel: string;
+  selectedYearLabel: string;
+  shortWeekLabel: string;
+  showWeekNumber: boolean;
+  startView: StartView;
+  todayLabel: string;
+  toyearLabel: string;
+  value?: null | string;
+  weekLabel: string;
+  weekNumberTemplate: string;
+  weekNumberType: WeekNumberType;
+}
+```
+
+<ParamField path="locale" type="string">
+  BCP 47 language tag (e.g., "en-US", "fr-FR", "ja-JP")
+</ParamField>
+
+<ParamField path="value" type="string | null">
+  Selected date value in ISO format (YYYY-MM-DD)
+</ParamField>
+
+<ParamField path="firstDayOfWeek" type="number">
+  First day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+</ParamField>
+
+<ParamField path="startView" type="StartView">
+  Initial view to display ("calendar" or "yearGrid")
+</ParamField>
+
+<ParamField path="disabledDates" type="string">
+  Comma-separated list of disabled dates (e.g., "2024-01-01, 2024-12-25")
+</ParamField>
+
+<ParamField path="disabledDays" type="string">
+  Comma-separated list of disabled weekdays (e.g., "0,6" for Sunday and Saturday)
+</ParamField>
+
+<ParamField path="showWeekNumber" type="boolean">
+  Whether to display week numbers
+</ParamField>
+
+<ParamField path="weekNumberType" type="WeekNumberType">
+  Week numbering system ("first-4-day-week", "first-day-of-year", "first-full-week")
+</ParamField>
+
+All label properties (e.g., `todayLabel`, `nextMonthLabel`) are for accessibility and internationalization.
+
+**Source:** `src/mixins/typings.ts:11-31`
+
+---
+
+## Event Types
+
+### CustomEventDetail
+
+Type map for all custom events dispatched by the date picker.
+
+```typescript
+interface CustomEventDetail {
+  ['date-updated']: CustomEventAction<'date-updated', CustomEventDetailDateUpdated>;
+  ['first-updated']: CustomEventAction<'first-updated', CustomEventDetailFirstUpdated>;
+  ['year-updated']: CustomEventAction<'year-updated', CustomEventDetailYearUpdated>;
+}
+```
+
+Each property maps an event name to its detail structure.
+
+**Usage Example:**
+
+```typescript
+const picker = document.querySelector('app-datepicker');
+
+picker.addEventListener('date-updated', (event) => {
+  const detail = event.detail; // Type: CustomEventDetailDateUpdated
+  console.log(detail.value); // Selected date string
+  console.log(detail.valueAsDate); // Selected date as Date object
+  console.log(detail.valueAsNumber); // Selected date as timestamp
+});
+```
+
+**Source:** `src/typings.ts:17-21`
+
+### ValueUpdatedEvent
+
+Event detail for value update events.
+
+```typescript
+interface ValueUpdatedEvent extends KeyEvent {
+  value: string;
+}
+```
+
+<ResponseField name="value" type="string">
+  The new date value in ISO format
+</ResponseField>
+
+<ResponseField name="isKeypress" type="boolean">
+  Whether the update was triggered by keyboard
+</ResponseField>
+
+<ResponseField name="key" type="SupportedKey">
+  The key that triggered the update (if isKeypress is true)
+</ResponseField>
+
+**Source:** `src/typings.ts:80-82`
+
+---
+
+## Formatting Types
+
+### Formatters
+
+Complete set of date formatters for a locale.
+
+```typescript
+interface Formatters extends Pick<DatePicker, 'locale'> {
+  dateFormat: DateTimeFormatter;
+  dayFormat: DateTimeFormatter;
+  fullDateFormat: DateTimeFormatter;
+  longMonthFormat: DateTimeFormatter;
+  longMonthYearFormat: DateTimeFormatter;
+  longWeekdayFormat: DateTimeFormatter;
+  narrowWeekdayFormat: DateTimeFormatter;
+  yearFormat: DateTimeFormatter;
+}
+```
+
+Each formatter is a function that takes a Date and returns a formatted string.
+
+**Usage Example:**
+
+```typescript
+import { toFormatters } from 'app-datepicker/helpers/to-formatters.js';
+import type { Formatters } from 'app-datepicker/typings.js';
+
+const formatters: Formatters = toFormatters('en-US');
+const date = new Date('2024-01-15');
+
+console.log(formatters.fullDateFormat(date)); // "Jan 15, 2024"
+console.log(formatters.longMonthFormat(date)); // "January"
+```
+
+**Source:** `src/typings.ts:43-52`
+
+---
+
+## View Types
+
+### StartView
+
+The initial view mode for the date picker.
+
+```typescript
+type StartView = StartViewTuple[number];
+type StartViewTuple = typeof startViews;
+```
+
+Possible values:
+- `"calendar"` - Shows the month calendar view
+- `"yearGrid"` - Shows the year selection grid
+
+**Usage Example:**
+
+```typescript
+import type { StartView } from 'app-datepicker/typings.js';
+
+const config = {
+  startView: 'calendar' as StartView,
+  locale: 'en-US',
+};
+```
+
+**Source:** `src/typings.ts:63-65`
+
+---
+
+## Helper Function Types
+
+### MaybeDate
+
+Flexible type for date values that can be in various formats.
+
+```typescript
+type MaybeDate = Date | null | number | string;
+```
+
+Accepts:
+- `Date` objects
+- `null` for no date
+- `number` for timestamps
+- `string` for ISO date strings
+
+**Usage Example:**
+
+```typescript
+import { toResolvedDate } from 'app-datepicker/helpers/to-resolved-date.js';
+import type { MaybeDate } from 'app-datepicker/helpers/typings.js';
+
+function processDate(input: MaybeDate): Date {
+  return toResolvedDate(input);
+}
+
+processDate('2024-01-15'); // ✓
+processDate(1705276800000); // ✓
+processDate(new Date()); // ✓
+processDate(null); // ✓
+```
+
+**Source:** `src/helpers/typings.ts:12`
+
+### DateValidatorResult
+
+Return type for date validation operations.
+
+```typescript
+interface DateValidatorResult {
+  date: Date;
+  isValid: boolean;
+}
+```
+
+<ResponseField name="date" type="Date">
+  The validated date or fallback date if invalid
+</ResponseField>
+
+<ResponseField name="isValid" type="boolean">
+  Whether the input date was valid
+</ResponseField>
+
+**Usage Example:**
+
+```typescript
+import { dateValidator } from 'app-datepicker/helpers/date-validator.js';
+import type { DateValidatorResult } from 'app-datepicker/helpers/typings.js';
+
+function validateUserInput(input: string): DateValidatorResult {
+  return dateValidator(input, new Date());
+}
+
+const result = validateUserInput('2024-01-15');
+if (result.isValid) {
+  console.log('Valid date:', result.date);
+} else {
+  console.log('Invalid, using fallback:', result.date);
+}
+```
+
+**Source:** `src/helpers/typings.ts:7-10`
+
+### MultiCalendars
+
+Data structure for multiple calendar months.
+
+```typescript
+interface MultiCalendars extends Omit<Calendar, 'calendar'> {
+  calendars: Pick<Calendar, 'calendar' | 'key'>[];
+  weekdays: CalendarWeekday[];
+}
+```
+
+<ResponseField name="calendars" type="Array">
+  Array of calendar data for each month
+</ResponseField>
+
+<ResponseField name="weekdays" type="CalendarWeekday[]">
+  Weekday header information
+</ResponseField>
+
+<ResponseField name="disabledDatesSet" type="Set<number>">
+  Set of all disabled date timestamps across calendars
+</ResponseField>
+
+<ResponseField name="disabledDaysSet" type="Set<number>">
+  Set of all disabled weekday numbers
+</ResponseField>
+
+<ResponseField name="key" type="string">
+  Unique key for the calendar configuration
+</ResponseField>
+
+**Source:** `src/helpers/typings.ts:14-17`
+
+---
+
+## Navigation Types
+
+### SupportedKey
+
+Keyboard keys supported for date navigation.
+
+```typescript
+type SupportedKey =
+  | typeof keyArrowDown
+  | typeof keyArrowLeft
+  | typeof keyArrowRight
+  | typeof keyArrowUp
+  | typeof keyEnd
+  | typeof keyEnter
+  | typeof keyHome
+  | typeof keyPageDown
+  | typeof keyPageUp
+  | typeof keySpace
+  | typeof keyTab;
+```
+
+Supported navigation keys:
+- **Arrow keys**: Navigate between dates
+- **Home/End**: Jump to start/end of week or month
+- **PageUp/PageDown**: Navigate between months
+- **Enter/Space**: Select date
+- **Tab**: Focus navigation
+
+**Source:** `src/typings.ts:67-78`
+
+### ToNextSelectableDateInit
+
+Configuration for finding the next selectable date.
+
+```typescript
+interface ToNextSelectableDateInit {
+  date: Date;
+  disabledDatesSet: Set<number>;
+  disabledDaysSet: Set<number>;
+  key: SupportedKey;
+  maxTime: number;
+  minTime: number;
+}
+```
+
+<ParamField path="date" type="Date" required>
+  Starting date
+</ParamField>
+
+<ParamField path="key" type="SupportedKey" required>
+  Navigation key pressed
+</ParamField>
+
+<ParamField path="minTime" type="number" required>
+  Minimum allowed timestamp
+</ParamField>
+
+<ParamField path="maxTime" type="number" required>
+  Maximum allowed timestamp
+</ParamField>
+
+<ParamField path="disabledDatesSet" type="Set<number>" required>
+  Set of disabled date timestamps
+</ParamField>
+
+<ParamField path="disabledDaysSet" type="Set<number>" required>
+  Set of disabled weekday numbers (0-6)
+</ParamField>
+
+**Source:** `src/helpers/typings.ts:35-42`
+
+---
+
+## Extended Component Types
+
+### DatePickerInputProperties
+
+Properties for the `<app-datepicker-input>` component.
+
+```typescript
+interface DatePickerInputProperties extends 
+  DatePickerProperties, 
+  Omit<TextField, keyof DatePickerProperties> {}
+```
+
+Combines date picker properties with Material Web Components TextField properties.
+
+**Source:** `src/date-picker-input/typings.ts:5`
+
+### DatePickerDialogProperties
+
+Properties for the `<app-datepicker-dialog>` component.
+
+```typescript
+interface DatePickerDialogProperties extends DialogProperties, DatePickerProperties {
+  confirmLabel: string;
+  dismissLabel: string;
+  hide(): void;
+  resetLabel: string;
+  show(): void;
+}
+```
+
+<ParamField path="confirmLabel" type="string" required>
+  Label for the confirm button
+</ParamField>
+
+<ParamField path="dismissLabel" type="string" required>
+  Label for the dismiss button
+</ParamField>
+
+<ParamField path="resetLabel" type="string" required>
+  Label for the reset button
+</ParamField>
+
+<ParamField path="show" type="() => void" required>
+  Method to show the dialog
+</ParamField>
+
+<ParamField path="hide" type="() => void" required>
+  Method to hide the dialog
+</ParamField>
+
+**Source:** `src/date-picker-dialog/typings.ts:7-13`
+
+### DialogClosingEventDetail
+
+Event detail for dialog closing events.
+
+```typescript
+interface DialogClosingEventDetail {
+  action: DialogClosingEventDetailAction;
+}
+
+type DialogClosingEventDetailAction = 'cancel' | 'reset' | 'set';
+```
+
+<ResponseField name="action" type="DialogClosingEventDetailAction">
+  The action that closed the dialog:
+  - `"set"` - User confirmed date selection
+  - `"cancel"` - User dismissed the dialog
+  - `"reset"` - User reset the date picker
+</ResponseField>
+
+**Usage Example:**
+
+```typescript
+const dialog = document.querySelector('app-datepicker-dialog');
+
+dialog.addEventListener('closing', (event) => {
+  const detail = event.detail as DialogClosingEventDetail;
+  
+  if (detail.action === 'set') {
+    console.log('Date confirmed:', dialog.value);
+  } else if (detail.action === 'cancel') {
+    console.log('Dialog cancelled');
+  }
+});
+```
+
+**Source:** `src/date-picker-dialog/typings.ts:17-21`
+
+---
+
+## Utility Types
+
+### Constructor
+
+Type for class constructors.
+
+```typescript
+type Constructor<T> = new (...args: any[]) => T;
+```
+
+Used internally for mixin patterns.
+
+**Source:** `src/utility-typings.ts:8`
+
+### ChangedProperties
+
+Type for tracking property changes in Lit elements.
+
+```typescript
+type ChangedProperties<T = Record<string, unknown>> = PropertyValues & Map<keyof T, T[keyof T]>;
+```
+
+Used in lifecycle methods like `updated()` to track which properties changed.
+
+**Source:** `src/typings.ts:10`
+
+### InferredFromSet
+
+Utility type to infer the element type from a Set.
+
+```typescript
+type InferredFromSet<SetType> = SetType extends Set<infer T> ? T : never;
+```
+
+**Source:** `src/typings.ts:54`
+
+---
+
+## Import Paths
+
+Import type definitions from their respective modules:
+
+```typescript
+// Core types
+import type {
+  DatePickerProperties,
+  Formatters,
+  StartView,
+  CustomEventDetail,
+  SupportedKey,
+} from 'app-datepicker/typings.js';
+
+// Helper types
+import type {
+  MaybeDate,
+  DateValidatorResult,
+  MultiCalendars,
+  ToMultiCalendarsInit,
+} from 'app-datepicker/helpers/typings.js';
+
+// Dialog types
+import type {
+  DatePickerDialogProperties,
+  DialogClosingEventDetail,
+} from 'app-datepicker/date-picker-dialog/typings.js';
+
+// Input types
+import type {
+  DatePickerInputProperties,
+} from 'app-datepicker/date-picker-input/typings.js';
+```
+
+---
+
+## Type-Safe Component Usage
+
+Here's a complete example of using types for full type safety:
+
+```typescript
+import type { DatePickerProperties, CustomEventDetail } from 'app-datepicker/typings.js';
+import type { MaybeDate } from 'app-datepicker/helpers/typings.js';
+import { dateValidator } from 'app-datepicker/helpers/date-validator.js';
+
+// Type-safe configuration
+const config: Partial<DatePickerProperties> = {
+  locale: 'en-US',
+  firstDayOfWeek: 1,
+  min: '2024-01-01',
+  max: '2024-12-31',
+  startView: 'calendar',
+};
+
+// Type-safe event handling
+const picker = document.querySelector('app-datepicker');
+
+picker?.addEventListener('date-updated', (event) => {
+  const customEvent = event as CustomEvent<
+    CustomEventDetail['date-updated']['detail']
+  >;
+  
+  const { value, valueAsDate, valueAsNumber } = customEvent.detail;
+  console.log('Selected:', value); // string
+  console.log('As Date:', valueAsDate); // Date
+  console.log('As timestamp:', valueAsNumber); // number
+});
+
+// Type-safe date validation
+function validateAndSet(input: MaybeDate): void {
+  const result = dateValidator(input, new Date());
+  
+  if (result.isValid && picker) {
+    picker.value = result.date.toISOString().split('T')[0];
+  }
+}
+```

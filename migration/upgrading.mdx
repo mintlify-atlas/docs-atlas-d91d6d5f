@@ -1,0 +1,377 @@
+---
+title: Upgrading from Older Versions
+description: Migration guide for upgrading app-datepicker from version 4.x/5.x to 6.0.0
+---
+
+## Overview
+
+Version 6.0.0 represents a complete rewrite of `app-datepicker` with modern web technologies. This guide helps you migrate from versions 4.x and 5.x to the latest 6.0.0-rc.33 release.
+
+<Warning>
+Version 6.0.0 introduces breaking changes that require code modifications. Please review this guide carefully before upgrading.
+</Warning>
+
+## Current Version
+
+The latest release is **6.0.0-rc.33** (released March 25, 2023).
+
+## Breaking Changes
+
+### Lit 3.x Upgrade
+
+Version 6.0.0 has been upgraded to use **Lit 3.x**, which introduces several breaking changes:
+
+<Accordion title="Lit 3.x Breaking Changes">
+
+**Key changes:**
+
+- The `@lit/reactive-element`, `lit-element`, and `lit-html` packages are now consolidated into the `lit` package
+- Updated decorator syntax and behavior
+- New reactivity system with improved performance
+- TypeScript types are now included in the main package
+
+**Migration steps:**
+
+```diff
+// Before (v4-5.x)
+- import { LitElement, html, css } from 'lit-element';
+- import { customElement, property } from 'lit-element/decorators.js';
+
+// After (v6.x)
++ import { LitElement, html, css } from 'lit';
++ import { customElement, property } from 'lit/decorators.js';
+```
+
+See the [Lit upgrade guide](https://lit.dev/docs/releases/upgrade/) for complete details.
+
+</Accordion>
+
+### TypeScript 5.3+ Required
+
+Version 6.0.0 now requires **TypeScript 5.3.3 or higher** for TypeScript users.
+
+<Note>
+If you're not using TypeScript, you can ignore this requirement. However, the element is compiled with features targeting ES2021.
+</Note>
+
+**Update your `package.json`:**
+
+```json
+{
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
+```
+
+### ES2021 Target
+
+The element is now compiled targeting **ES2021** features. You may need to transpile the package for older browser support.
+
+**Supported browsers:**
+
+- Chrome/Edge 100+
+- Firefox 96+
+- Safari 15.4+
+
+<Warning>
+Internet Explorer 11 is no longer supported. Use the new Microsoft Edge based on Chromium instead.
+</Warning>
+
+### Element Naming and Structure
+
+<Accordion title="Complete Rewrite with New Architecture">
+
+Version 6.0.0 was completely rewritten from the ground up with a new component architecture:
+
+**Major architectural changes:**
+
+- Moved from Polymer-style to modern Lit patterns
+- Improved styling system with CSS custom properties
+- Enhanced keyboard navigation and accessibility
+- Better Material Design 2021 compliance
+- Refactored internal components for better modularity
+
+**Key component updates:**
+
+- `DatePickerInput` - Enhanced with lazy loading support via `.lazyLoad` property
+- `DatePickerDialog` - Improved dialog behavior with clean slate on re-open
+- `IconButton` - Custom implementation to fix rendering bugs in Material Web Components
+- Year Grid and Month Calendar - Completely refactored with better performance
+
+</Accordion>
+
+### API Changes
+
+<Accordion title="Property and Method Changes">
+
+**New features added:**
+
+1. **DatePickerInput properties:**
+   - `disabled` - Disable the date picker input
+   - `readonly` - Make the input read-only
+   - `valueAsDate` - Get/set value as Date object
+   - `valueAsNumber` - Get/set value as timestamp
+
+2. **Lazy loading support:**
+   ```typescript
+   // DatePickerInput now supports lazy loading
+   datePicker.lazyLoad = true;
+   ```
+
+3. **Export parts:**
+   - New CSS parts exposed: `today`, `toyear`, `calendar`, `yearGrid`
+   - Allows better styling customization through `::part()` selector
+
+**Behavior changes:**
+
+- Date picker now always opens in calendar view (not year view)
+- Dialog re-opens with a clean slate instead of previous state
+- Improved `.layout()` method timing for property updates
+
+</Accordion>
+
+### Styling Changes
+
+<Accordion title="CSS Custom Properties">
+
+Version 6.0.0 includes major refactoring for Material Design 2021 compatibility:
+
+**Simplified CSS Custom Properties:**
+
+The styling system has been simplified and standardized. Many CSS custom properties were consolidated or renamed.
+
+**Material Design 2021 updates:**
+
+- Updated shape values (4px border radius)
+- Improved color system alignment with MD2021
+- Better scrim color customization
+- Enhanced styling for disabled and readonly states
+
+**Migration example:**
+
+```css
+/* Review your custom styles and update to use new CSS variables */
+app-date-picker {
+  /* Some variables may have changed - check component docs */
+  --app-date-picker-border-radius: 4px; /* Updated default */
+}
+```
+
+</Accordion>
+
+### Dependency Updates
+
+<Accordion title="Material Web Components">
+
+Version 6.0.0 uses Material Web Components 0.27.0:
+
+```json
+{
+  "dependencies": {
+    "@material/mwc-base": "^0.27.0",
+    "@material/mwc-button": "^0.27.0",
+    "@material/mwc-dialog": "^0.27.0",
+    "@material/mwc-icon-button": "^0.27.0",
+    "@material/mwc-menu": "^0.27.0",
+    "@material/mwc-textfield": "^0.27.0"
+  }
+}
+```
+
+<Note>
+Material Web Components may have their own breaking changes. Review their documentation if you use them directly.
+</Note>
+
+</Accordion>
+
+## Migration Steps
+
+### 1. Update Dependencies
+
+Update your `package.json`:
+
+```bash
+npm install app-datepicker@next
+# or
+npm install app-datepicker@6.0.0-rc.33
+```
+
+If using TypeScript:
+
+```bash
+npm install -D typescript@^5.3.3
+```
+
+### 2. Update Import Statements
+
+Change all Lit imports to use the consolidated package:
+
+```diff
+- import { LitElement, html, css } from 'lit-element';
+- import { customElement, property } from 'lit-element/decorators.js';
++ import { LitElement, html, css } from 'lit';
++ import { customElement, property } from 'lit/decorators.js';
+
+import 'app-datepicker';
+```
+
+### 3. Review Property Usage
+
+Check if you're using any properties that may have changed behavior:
+
+```typescript
+// New properties available in v6
+const picker = document.querySelector('app-date-picker-input');
+
+// Access value as Date or timestamp
+const date = picker.valueAsDate;
+const timestamp = picker.valueAsNumber;
+
+// Enable lazy loading
+picker.lazyLoad = true;
+
+// Disable or make readonly
+picker.disabled = true;
+picker.readonly = true;
+```
+
+### 4. Update Custom Styles
+
+Review and update any custom CSS:
+
+```css
+/* Use new CSS parts for targeted styling */
+app-date-picker::part(today) {
+  /* Style the today button */
+}
+
+app-date-picker::part(calendar) {
+  /* Style the calendar container */
+}
+
+app-date-picker::part(yearGrid) {
+  /* Style the year grid */
+}
+```
+
+### 5. Test Thoroughly
+
+After migration:
+
+1. **Test all date picker interactions** - Ensure calendar navigation works
+2. **Verify event handlers** - Check that date selection events still fire correctly
+3. **Test keyboard navigation** - Verify accessibility improvements
+4. **Check responsive behavior** - Test on different screen sizes
+5. **Validate form integration** - If using in forms, test submission
+
+## Version-Specific Notes
+
+### From 4.x to 6.x
+
+<Accordion title="Major Version Jump">
+
+If you're upgrading from version 4.x, you're skipping version 5.x entirely. Version 6.0.0-rc.0 was released in November 2021, representing a complete rewrite from version 4.5.1.
+
+**Key differences from v4:**
+
+- Complete rewrite with Lit 3.x (v4 used lit-element 2.x)
+- New component architecture
+- Better TypeScript support
+- Improved accessibility
+- Material Design 2021 updates
+- Removed Polymer dependencies
+- Better bundle size and performance
+
+**Additional considerations:**
+
+- Review all component APIs - many internals were refactored
+- Test all custom event handlers
+- Verify polyfill requirements (still need Intl.DateTimeFormat)
+
+</Accordion>
+
+### From 5.x to 6.x
+
+<Note>
+Version 5.x was a transitional branch. The main changes are similar to those from 4.x, with the addition of Lit 3.x upgrade requirements.
+</Note>
+
+## Older Versions
+
+Documentation and code for older versions are available on separate branches:
+
+- [Version 4-5.x branch](https://github.com/motss/app-datepicker/tree/4-5.x)
+
+<Warning>
+Older versions are no longer actively maintained. We recommend upgrading to v6 for bug fixes and new features.
+</Warning>
+
+## Polyfills
+
+Version 6.0.0 still requires the same polyfills as previous versions:
+
+### Required Polyfills
+
+<Accordion title="Intl.DateTimeFormat and Array.prototype.find">
+
+**Intl.DateTimeFormat** - Required for date formatting:
+
+```html
+<script>
+  if (!window.Intl) {
+    var script = document.createElement('script');
+    script.src = 'https://esm.run/intl@1.2.4/dist/Intl.complete.js';
+    script.onload = function() {
+      console.info('Intl polyfill loaded');
+    };
+    script.onerror = console.error;
+    document.head.appendChild(script);
+  }
+</script>
+```
+
+**Array.prototype.find** - Required for array operations:
+
+```html
+<script>
+  if (null == Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+      value: function arrayFind(cb) {
+        var filtered = this.filter(cb);
+        return !filtered.length ? void 0 : filtered[0];
+      },
+    });
+  }
+</script>
+```
+
+</Accordion>
+
+## Getting Help
+
+If you encounter issues during migration:
+
+1. **Check the changelog** - Review [CHANGELOG.md](https://github.com/motss/app-datepicker/blob/main/CHANGELOG.md) for detailed changes
+2. **Review API documentation** - See the component API references for updated properties
+3. **Check GitHub Issues** - Search for [existing issues](https://github.com/motss/app-datepicker/issues)
+4. **Join Discord** - Get community support on the [app-datepicker Discord](https://discord.gg/ps8mCrvTKR)
+
+## Summary Checklist
+
+Use this checklist to ensure a smooth migration:
+
+- [ ] Update `package.json` dependencies (app-datepicker, lit, TypeScript)
+- [ ] Update all Lit imports to use consolidated `lit` package
+- [ ] Update decorator imports to `lit/decorators.js`
+- [ ] Review and update TypeScript configuration (if applicable)
+- [ ] Update custom CSS using new CSS parts and variables
+- [ ] Test date picker functionality thoroughly
+- [ ] Verify keyboard navigation and accessibility
+- [ ] Check browser compatibility for ES2021 target
+- [ ] Update polyfills if supporting older browsers
+- [ ] Review Material Web Components changes (if using them)
+
+<Note>
+The effort required for migration depends on how extensively you've customized the components. Most applications with standard usage should only need dependency and import updates.
+</Note>

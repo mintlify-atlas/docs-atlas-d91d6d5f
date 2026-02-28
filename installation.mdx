@@ -1,0 +1,254 @@
+---
+title: Installation
+description: Install app-datepicker in your project using npm, yarn, or pnpm
+---
+
+# Installation
+
+app-datepicker is distributed as an npm package and can be installed using your preferred package manager. The package includes TypeScript type definitions and works with all modern build tools.
+
+## Package managers
+
+Install app-datepicker using your preferred package manager:
+
+<CodeGroup>
+
+```bash npm
+npm install app-datepicker@next
+```
+
+```bash yarn
+yarn add app-datepicker@next
+```
+
+```bash pnpm
+pnpm add app-datepicker@next
+```
+
+</CodeGroup>
+
+<Note>
+The `@next` tag installs version 6.x, which is the current actively developed version. Version 6.0.0 is currently at release candidate 33.
+</Note>
+
+## CDN usage
+
+For quick prototyping or if you prefer not to use a build tool, you can load app-datepicker directly from a CDN:
+
+<CodeGroup>
+
+```html esm.run (jsdelivr)
+<script type="module">
+  import 'https://esm.run/app-datepicker@next';
+</script>
+```
+
+```html esm.sh
+<script type="module">
+  import 'https://esm.sh/app-datepicker@next?target=es2019';
+</script>
+```
+
+</CodeGroup>
+
+## Prerequisites
+
+Before using app-datepicker, ensure your project meets these requirements:
+
+### Runtime requirements
+
+<Steps>
+
+<Step title="ES2021 support">
+  The element is compiled targeting ES2021 features. Older browsers may require transpilation.
+  
+  **Required features:**
+  - ES2021 syntax and APIs
+  - ES Modules support
+  - Web Components support
+</Step>
+
+<Step title="Lit 3.1.0 or higher">
+  app-datepicker is built with Lit and requires version 3.1.0 or higher.
+  
+  ```json package.json
+  {
+    "dependencies": {
+      "lit": "^3.1.0",
+      "app-datepicker": "@next"
+    }
+  }
+  ```
+</Step>
+
+<Step title="TypeScript 5.3.3+ (TypeScript users only)">
+  If you're using TypeScript, version 5.3.3 or higher is recommended for full type support.
+  
+  ```json tsconfig.json
+  {
+    "compilerOptions": {
+      "target": "ES2021",
+      "module": "ESNext",
+      "moduleResolution": "bundler"
+    }
+  }
+  ```
+</Step>
+
+</Steps>
+
+## Dependencies
+
+app-datepicker has minimal dependencies to keep your bundle size small:
+
+### Core dependencies
+
+```json package.json
+{
+  "dependencies": {
+    "lit": "^3.1.0",
+    "nodemod": "^3.0.6",
+    "tslib": "^2.6.2"
+  }
+}
+```
+
+### Material Web Components (optional)
+
+app-datepicker includes integration components that use Material Web Components:
+
+- `@material/mwc-button`: ^0.27.0
+- `@material/mwc-dialog`: ^0.27.0
+- `@material/mwc-icon-button`: ^0.27.0
+- `@material/mwc-menu`: ^0.27.0
+- `@material/mwc-textfield`: ^0.27.0
+
+<Note>
+These dependencies are only needed if you use `app-date-picker-input` or `app-date-picker-dialog`. The core `app-date-picker` component doesn't require them.
+</Note>
+
+## Polyfills
+
+For broader browser support, you may need polyfills for certain features:
+
+### Required polyfills
+
+<Warning>
+The following JavaScript features must be available or polyfilled:
+
+- **Array.prototype.find** - For array operations
+- **Intl.DateTimeFormat** - For internationalization and date formatting
+</Warning>
+
+### Polyfill example
+
+Here's a snippet that loads polyfills via feature detection:
+
+```html index.html
+<script>
+  // Polyfill Array.prototype.find
+  if (null == Array.prototype.find) {
+    Object.defineProperty(Array.prototype, 'find', {
+      value: function arrayFind(cb) {
+        var filtered = this.filter(cb);
+        return !filtered.length ? void 0 : filtered[0];
+      },
+    });
+  }
+
+  // Polyfill Intl.DateTimeFormat
+  if (!window.Intl) {
+    var script = document.createElement('script');
+    // Pin package version due to known issues
+    script.src = 'https://esm.run/intl@1.2.4/dist/Intl.complete.js';
+    script.onload = function() {
+      console.info('🌐 Intl polyfill loaded');
+    };
+    script.onerror = console.error;
+    document.head.appendChild(script);
+  }
+</script>
+```
+
+<Tip>
+Most modern browsers support these features natively. Polyfills are typically only needed for older browsers or specific environments.
+</Tip>
+
+## Browser compatibility
+
+app-datepicker works in the last 2 versions of all evergreen browsers:
+
+### Tested browsers
+
+- **Chrome/Edge**: 100+
+- **Firefox**: 96+
+- **Safari**: 15.4+
+
+### Untested but should work
+
+- **Edge**: 18 and below (with polyfills)
+- **Safari**: 13.1 and below (with polyfills)
+
+<Warning>
+**Internet Explorer 11 is not supported.** Please use the new Chromium-based Microsoft Edge instead.
+</Warning>
+
+## Node.js requirements
+
+For development and building:
+
+```json package.json
+{
+  "engines": {
+    "node": ">= 18.x",
+    "npm": ">= 10.x"
+  }
+}
+```
+
+## Package exports
+
+app-datepicker provides multiple entry points for different components:
+
+```javascript
+// Main export - app-date-picker
+import 'app-datepicker';
+
+// Individual component imports
+import 'app-datepicker/app-date-picker';
+import 'app-datepicker/app-date-picker-dialog';
+import 'app-datepicker/app-date-picker-input';
+import 'app-datepicker/app-month-calendar';
+import 'app-datepicker/app-year-grid';
+
+// Base class imports (for extending)
+import { DatePicker } from 'app-datepicker/date-picker';
+import { DatePickerDialog } from 'app-datepicker/date-picker-dialog';
+import { DatePickerInput } from 'app-datepicker/date-picker-input';
+```
+
+## Verification
+
+After installation, verify that everything is working:
+
+```bash
+# Check installed version
+npm list app-datepicker
+
+# Expected output:
+# app-datepicker@6.0.0-rc.33
+```
+
+## Next steps
+
+Now that you have app-datepicker installed, learn how to use it:
+
+<CardGroup cols={2}>
+  <Card title="Quick start guide" icon="rocket" href="/quickstart">
+    Get your first datepicker running in minutes
+  </Card>
+  
+  <Card title="API reference" icon="book" href="/api/app-date-picker">
+    Explore all available properties and methods
+  </Card>
+</CardGroup>

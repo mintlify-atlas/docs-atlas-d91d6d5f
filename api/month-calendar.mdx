@@ -1,0 +1,340 @@
+---
+title: 'app-month-calendar'
+description: 'Calendar grid component for displaying and selecting dates within a month'
+---
+
+## Overview
+
+The `app-month-calendar` component is a low-level calendar grid that displays a single month view. It's used internally by `app-date-picker` but can also be used standalone for custom implementations.
+
+## Installation
+
+```bash
+npm install app-datepicker
+```
+
+## Import
+
+```javascript
+import 'app-datepicker/app-month-calendar';
+```
+
+Or import from specific path:
+
+```javascript
+import 'app-datepicker/dist/month-calendar/app-month-calendar.js';
+```
+
+## Usage
+
+<Note>
+This is a low-level component. Most use cases should use [app-date-picker](/api/app-date-picker) instead.
+</Note>
+
+```html
+<app-month-calendar></app-month-calendar>
+
+<script type="module">
+  import 'app-datepicker/app-month-calendar';
+  import { calendar } from 'nodemod/dist/calendar/calendar.js';
+  import { getWeekdays } from 'nodemod/dist/calendar/helpers/get-weekdays.js';
+  
+  const monthCalendar = document.querySelector('app-month-calendar');
+  const currentDate = new Date();
+  
+  // Generate calendar data
+  const { calendar: calendarData } = calendar({
+    date: currentDate,
+    firstDayOfWeek: 0,
+    showWeekNumber: false,
+  });
+  
+  const weekdays = getWeekdays({
+    firstDayOfWeek: 0,
+    showWeekNumber: false,
+  });
+  
+  // Set data
+  monthCalendar.data = {
+    calendar: calendarData,
+    currentDate: currentDate,
+    date: currentDate,
+    disabledDatesSet: new Set(),
+    disabledDaysSet: new Set(),
+    formatters: {
+      longMonthYearFormat: new Intl.DateTimeFormat('en-US', {
+        month: 'long',
+        year: 'numeric'
+      }).format,
+    },
+    max: new Date('2100-12-31'),
+    min: new Date('1970-01-01'),
+    selectedDateLabel: 'Selected date',
+    showWeekNumber: false,
+    todayDate: new Date(),
+    todayLabel: 'Today',
+    weekdays: weekdays,
+  };
+  
+  monthCalendar.addEventListener('date-updated', (e) => {
+    console.log('Date selected:', e.detail.value);
+  });
+</script>
+```
+
+## Properties
+
+<ParamField path="data" type="MonthCalendarData">
+  Calendar data object containing all necessary information to render the month view.
+  
+  ```typescript
+  interface MonthCalendarData {
+    calendar: CalendarDay[][];           // 2D array of calendar data
+    currentDate: Date;                   // Current month being displayed
+    date: Date;                          // Selected date
+    disabledDatesSet: Set<number>;       // Set of disabled date timestamps
+    disabledDaysSet: Set<number>;        // Set of disabled day numbers (0-6)
+    formatters: Formatters;              // Date formatting functions
+    max: Date;                           // Maximum selectable date
+    min: Date;                           // Minimum selectable date
+    selectedDateLabel: string;           // Label for selected date
+    showCaption?: boolean;               // Show month/year caption
+    showWeekNumber?: boolean;            // Show week number column
+    todayDate: Date;                     // Today's date
+    todayLabel: string;                  // Label for today
+    weekdays: Weekday[];                 // Weekday headers
+  }
+  ```
+</ParamField>
+
+<ParamField path="selectedCalendarDay" type="Promise<HTMLTableCellElement | null>" readonly>
+  Async query for the currently selected calendar day element.
+  
+  ```javascript
+  const selectedDay = await monthCalendar.selectedCalendarDay;
+  if (selectedDay) {
+    console.log('Selected day:', selectedDay.getAttribute('data-day'));
+  }
+  ```
+</ParamField>
+
+## Events
+
+### date-updated
+
+Fires when a date is selected (clicked or via keyboard).
+
+```typescript
+interface DateUpdatedDetail {
+  isKeypress: boolean;
+  value: string;           // ISO 8601 format: "2024-02-02"
+  valueAsDate: Date;
+  valueAsNumber: number;
+  key?: string;            // Present if triggered by keyboard
+}
+```
+
+```javascript
+monthCalendar.addEventListener('date-updated', (event) => {
+  console.log('Date:', event.detail.value);
+  console.log('Keyboard navigation:', event.detail.isKeypress);
+  if (event.detail.key) {
+    console.log('Key pressed:', event.detail.key);
+  }
+});
+```
+
+## CSS Shadow Parts
+
+```css
+app-month-calendar::part(calendar) {
+  /* Calendar container */
+}
+
+app-month-calendar::part(table) {
+  border-collapse: collapse;
+}
+
+app-month-calendar::part(caption) {
+  font-weight: bold;
+}
+
+app-month-calendar::part(weekdays) {
+  background: #f5f5f5;
+}
+
+app-month-calendar::part(weekday) {
+  text-align: center;
+}
+
+app-month-calendar::part(weekday-value) {
+  /* Weekday text */
+}
+
+app-month-calendar::part(week-number) {
+  color: #999;
+}
+
+app-month-calendar::part(calendar-day) {
+  cursor: pointer;
+}
+
+app-month-calendar::part(today) {
+  border: 2px solid currentColor;
+}
+```
+
+### Available Parts
+
+- `calendar` - Main calendar container
+- `table` - Calendar table element
+- `caption` - Month/year caption (if shown)
+- `weekdays` - Weekday headers row
+- `weekday` - Individual weekday header
+- `weekday-value` - Weekday text content
+- `week-number` - Week number cells
+- `calendar-day` - Calendar day cells
+- `today` - Today's date cell
+
+## Keyboard Navigation
+
+- **Arrow Up** - Previous week (same day)
+- **Arrow Down** - Next week (same day)
+- **Arrow Left** - Previous day
+- **Arrow Right** - Next day
+- **Home** - First day of current week
+- **End** - Last day of current week
+- **Page Up** - Previous month (same day)
+- **Page Down** - Next month (same day)
+- **Alt + Page Up** - Previous year (same day)
+- **Alt + Page Down** - Next year (same day)
+- **Enter / Space** - Select focused date
+
+## Methods
+
+<ParamField path="$renderCalendarDay(init)" type="method" protected>
+  Protected method for rendering individual calendar day cells. Can be overridden for customization.
+  
+  ```typescript
+  interface MonthCalendarRenderCalendarDayInit {
+    ariaDisabled: string;
+    ariaLabel: string;
+    ariaSelected: string;
+    className: string;
+    day: string;
+    fullDate: Date;
+    part: string;
+    tabIndex: number;
+    title?: string;
+  }
+  ```
+</ParamField>
+
+## Example: Custom Calendar
+
+```javascript
+import 'app-datepicker/app-month-calendar';
+import { calendar } from 'nodemod/dist/calendar/calendar.js';
+import { getWeekdays } from 'nodemod/dist/calendar/helpers/get-weekdays.js';
+
+class CustomMonthCalendar extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+  
+  connectedCallback() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        app-month-calendar::part(today) {
+          background: #e3f2fd;
+          border-color: #1976d2;
+        }
+        app-month-calendar::part(calendar-day) {
+          border-radius: 50%;
+        }
+      </style>
+      <app-month-calendar></app-month-calendar>
+    `;
+    
+    const monthCalendar = this.shadowRoot.querySelector('app-month-calendar');
+    const today = new Date();
+    
+    // Build calendar data
+    const formatters = {
+      longMonthYearFormat: (date) => 
+        new Intl.DateTimeFormat('en-US', {
+          month: 'long',
+          year: 'numeric'
+        }).format(date),
+    };
+    
+    const { calendar: cal } = calendar({
+      date: today,
+      firstDayOfWeek: 0,
+    });
+    
+    monthCalendar.data = {
+      calendar: cal,
+      currentDate: today,
+      date: today,
+      disabledDatesSet: new Set(),
+      disabledDaysSet: new Set([0, 6]), // Disable weekends
+      formatters,
+      max: new Date('2100-12-31'),
+      min: new Date('1970-01-01'),
+      selectedDateLabel: 'Selected',
+      showCaption: true,
+      showWeekNumber: false,
+      todayDate: today,
+      todayLabel: 'Today',
+      weekdays: getWeekdays({ firstDayOfWeek: 0 }),
+    };
+    
+    monthCalendar.addEventListener('date-updated', (e) => {
+      this.dispatchEvent(new CustomEvent('date-change', {
+        detail: e.detail
+      }));
+    });
+  }
+}
+
+customElements.define('custom-month-calendar', CustomMonthCalendar);
+```
+
+## TypeScript
+
+```typescript
+import type { AppMonthCalendar } from 'app-datepicker/app-month-calendar';
+import type { MonthCalendarData } from 'app-datepicker/month-calendar/typings';
+
+const monthCalendar = document.querySelector('app-month-calendar') as AppMonthCalendar;
+
+const data: MonthCalendarData = {
+  calendar: [],
+  currentDate: new Date(),
+  date: new Date(),
+  disabledDatesSet: new Set(),
+  disabledDaysSet: new Set(),
+  formatters: {
+    longMonthYearFormat: (date: Date) => date.toLocaleDateString()
+  },
+  max: new Date('2100-12-31'),
+  min: new Date('1970-01-01'),
+  selectedDateLabel: 'Selected date',
+  todayDate: new Date(),
+  todayLabel: 'Today',
+  weekdays: [],
+};
+
+monthCalendar.data = data;
+```
+
+## Behavior Notes
+
+- The component uses `delegatesFocus: true` for better keyboard accessibility
+- Only updates when `data` and `data.formatters` are both set
+- Automatically focuses the selected date when navigating with keyboard
+- Prevents event propagation to work properly within dialogs
+- Handles disabled dates and days by preventing selection
+- Supports right-to-left (RTL) layouts automatically

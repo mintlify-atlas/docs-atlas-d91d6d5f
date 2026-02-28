@@ -1,80 +1,610 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get from zero to a working datepicker in minutes
 ---
 
-## Get started in three steps
+# Quickstart
 
-Get your documentation site running locally and make your first customization.
+Get up and running with app-datepicker in minutes. This guide walks you through installation, basic setup, and common configuration patterns to have a beautiful Material Design datepicker working in your application quickly.
 
-### Step 1: Set up your local environment
+## Installation
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+First, install app-datepicker using your preferred package manager:
+
+<CodeGroup>
+
+```bash npm
+npm install app-datepicker@next
+```
+
+```bash yarn
+yarn add app-datepicker@next
+```
+
+```bash pnpm
+pnpm add app-datepicker@next
+```
+
+</CodeGroup>
+
+<Note>
+The `@next` tag installs version 6.x (currently at RC 33), which is the actively developed version with the latest features and improvements.
+</Note>
+
+## Basic HTML usage
+
+The simplest way to get started is with a CDN import. No build tools required:
+
+<Steps>
+
+<Step title="Create an HTML file">
+Create an `index.html` file with this basic structure:
+
+```html index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Date Picker</title>
+  
+  <!-- Import from CDN -->
+  <script type="module">
+    import 'https://esm.run/app-datepicker@next';
+  </script>
+</head>
+<body>
+  <h1>Select a Date</h1>
+  <app-date-picker></app-date-picker>
+</body>
+</html>
+```
+</Step>
+
+<Step title="Add event handling">
+Listen for date selection and display the value:
+
+```html index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Date Picker</title>
+  
+  <script type="module">
+    import 'https://esm.run/app-datepicker@next';
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    window.addEventListener('DOMContentLoaded', () => {
+      const picker = document.querySelector('app-date-picker');
+      const output = document.getElementById('selected-date');
+      
+      picker.addEventListener('date-updated', (event) => {
+        const { value, valueAsDate, valueAsNumber } = event.detail;
+        output.textContent = `Selected: ${value} (${valueAsDate.toLocaleDateString()})`;
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Select a Date</h1>
+  <app-date-picker 
+    min="2024-01-01" 
+    max="2024-12-31"
+    value="2024-03-15"
+  ></app-date-picker>
+  
+  <p id="selected-date">Selected: 2024-03-15</p>
+</body>
+</html>
+```
+</Step>
+
+<Step title="Open in browser">
+Open the file in your browser and you'll see a fully functional Material Design datepicker!
+</Step>
+
+</Steps>
+
+## Usage with a bundler (npm/yarn/pnpm)
+
+For production applications, use app-datepicker with a module bundler like Vite, Webpack, or Rollup.
+
+<Steps>
+
+<Step title="Install dependencies">
+```bash
+npm install app-datepicker@next lit
+```
+</Step>
+
+<Step title="Import and use in TypeScript/JavaScript">
+
+<CodeGroup>
+
+```typescript Lit component
+import { LitElement, html, css } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import 'app-datepicker';
+
+@customElement('my-app')
+export class MyApp extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      padding: 20px;
+    }
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    app-date-picker {
+      margin: 20px 0;
+    }
+  `;
 
-### Step 2: Deploy your changes
+  @state()
+  private selectedDate = '2024-03-15';
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+  private handleDateUpdate(e: CustomEvent) {
+    const { value, valueAsDate } = e.detail;
+    this.selectedDate = value;
+    console.log('Date selected:', value, valueAsDate);
+  }
+
+  render() {
+    return html`
+      <h1>Choose Your Date</h1>
+      
+      <app-date-picker
+        .value=${this.selectedDate}
+        min="2024-01-01"
+        max="2024-12-31"
+        @date-updated=${this.handleDateUpdate}
+      ></app-date-picker>
+      
+      <p>Selected date: ${this.selectedDate}</p>
+    `;
+  }
+}
+```
+
+```javascript Vanilla JavaScript
+import 'app-datepicker';
+
+// Create and configure the picker
+const picker = document.createElement('app-date-picker');
+picker.value = '2024-03-15';
+picker.min = '2024-01-01';
+picker.max = '2024-12-31';
+
+// Add event listener
+picker.addEventListener('date-updated', (event) => {
+  const { value, valueAsDate, valueAsNumber } = event.detail;
+  console.log('Selected:', value);
+  console.log('As Date:', valueAsDate);
+  console.log('As Number:', valueAsNumber);
+});
+
+// Add to page
+document.body.appendChild(picker);
+```
+
+```typescript React (with wrapper)
+import { useEffect, useRef, useState } from 'react';
+import 'app-datepicker';
+
+function DatePicker() {
+  const pickerRef = useRef<any>(null);
+  const [selectedDate, setSelectedDate] = useState('2024-03-15');
+
+  useEffect(() => {
+    const picker = pickerRef.current;
+    if (!picker) return;
+
+    const handleDateUpdate = (e: CustomEvent) => {
+      setSelectedDate(e.detail.value);
+    };
+
+    picker.addEventListener('date-updated', handleDateUpdate);
+    return () => {
+      picker.removeEventListener('date-updated', handleDateUpdate);
+    };
+  }, []);
+
+  return (
+    <div>
+      <h1>Select a Date</h1>
+      <app-date-picker
+        ref={pickerRef}
+        value={selectedDate}
+        min="2024-01-01"
+        max="2024-12-31"
+      />
+      <p>Selected: {selectedDate}</p>
+    </div>
+  );
+}
+```
+
+</CodeGroup>
+
+</Step>
+
+<Step title="Configure your bundler">
+Ensure your bundler is configured to handle ES modules. For Vite:
+
+```javascript vite.config.js
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  build: {
+    target: 'es2021',
+  },
+});
+```
+</Step>
+
+</Steps>
+
+## Component variants
+
+app-datepicker provides three component variants for different use cases:
+
+<CardGroup cols={3}>
+  <Card title="date-picker" icon="calendar">
+    Inline calendar component for embedding directly in your UI
+  </Card>
+  <Card title="date-picker-input" icon="input-text">
+    Material Design text field with integrated datepicker dropdown
+  </Card>
+  <Card title="date-picker-dialog" icon="window-maximize">
+    Modal dialog containing the datepicker
+  </Card>
+</CardGroup>
+
+### Using date-picker-input
+
+Perfect for form fields:
+
+```typescript
+import 'app-datepicker/app-date-picker-input';
+
+// In your HTML/template
+<app-date-picker-input
+  label="Date of Birth"
+  placeholder="Select your date of birth"
+  value="2024-03-15"
+  min="1900-01-01"
+  max="2024-12-31"
+  outlined
+></app-date-picker-input>
+```
+
+### Using date-picker-dialog
+
+Great for mobile experiences:
+
+```typescript
+import 'app-datepicker/app-date-picker-dialog';
+
+// Show the dialog
+const dialog = document.querySelector('app-date-picker-dialog');
+dialog.show();
+
+// Listen for dialog events
+dialog.addEventListener('closing', (event) => {
+  const action = event.detail.action; // 'set', 'cancel', or 'reset'
+  if (action === 'set') {
+    console.log('Date confirmed:', dialog.value);
+  }
+});
+```
+
+## Common configuration patterns
+
+### Date constraints
+
+Restrict selectable dates with `min` and `max`:
+
+```html
+<app-date-picker
+  min="2024-01-01"
+  max="2024-12-31"
+  value="2024-06-15"
+></app-date-picker>
+```
+
+### Disabling specific dates
+
+Disable weekends and specific dates:
+
+```html
+<app-date-picker
+  value="2024-03-15"
+  disabledDays="0,6"
+  disabledDates="2024-03-20,2024-03-21,2024-03-25"
+></app-date-picker>
+```
+
+<Note>
+**disabledDays**: `0` = Sunday, `1` = Monday, ..., `6` = Saturday
+
+**disabledDates**: Comma-separated list of dates in `YYYY-MM-DD` format
+</Note>
+
+### Internationalization
+
+Set the locale for proper date formatting and first day of week:
+
+<CodeGroup>
+
+```html German (Monday start)
+<app-date-picker
+  locale="de-DE"
+  firstDayOfWeek="1"
+  value="2024-03-15"
+></app-date-picker>
+```
+
+```html US English (Sunday start)
+<app-date-picker
+  locale="en-US"
+  firstDayOfWeek="0"
+  value="2024-03-15"
+></app-date-picker>
+```
+
+```html Japanese
+<app-date-picker
+  locale="ja-JP"
+  firstDayOfWeek="0"
+  value="2024-03-15"
+></app-date-picker>
+```
+
+</CodeGroup>
+
+### Week numbers
+
+Display ISO week numbers:
+
+```html
+<app-date-picker
+  value="2024-03-15"
+  showWeekNumber
+  weekNumberType="first-4-day-week"
+></app-date-picker>
+```
+
+### Start view
+
+Control which view shows first - calendar or year grid:
+
+<CodeGroup>
+
+```html Calendar view (default)
+<app-date-picker
+  value="2024-03-15"
+  startView="calendar"
+></app-date-picker>
+```
+
+```html Year grid view
+<app-date-picker
+  value="2024-03-15"
+  startView="yearGrid"
+></app-date-picker>
+```
+
+</CodeGroup>
+
+<Tip>
+The year grid view is perfect for date of birth pickers where users need to select a year first.
+</Tip>
+
+## Event handling
+
+All components emit these events:
+
+### date-updated
+
+Fired when a date is selected:
+
+```typescript
+picker.addEventListener('date-updated', (event) => {
+  const { 
+    value,        // '2024-03-15' (ISO string)
+    valueAsDate,  // Date object
+    valueAsNumber,// Unix timestamp (ms)
+    isKeypress,   // true if selected via keyboard
+    key           // Key name if keyboard selection
+  } = event.detail;
+  
+  console.log('Selected date:', value);
+});
+```
+
+### first-updated
+
+Fired once when the component first renders:
+
+```typescript
+picker.addEventListener('first-updated', (event) => {
+  const { value, valueAsDate, valueAsNumber, focusableElements } = event.detail;
+  console.log('Picker initialized with:', value);
+});
+```
+
+## Complete working example
+
+Here's a complete example with multiple features:
+
+```typescript
+import { LitElement, html, css } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import 'app-datepicker';
+
+@customElement('vacation-planner')
+export class VacationPlanner extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 24px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    h1 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    app-date-picker {
+      margin: 20px 0;
+      
+      /* Custom theme colors */
+      --app-primary: #1976d2;
+      --app-on-primary: #ffffff;
+      --app-surface: #ffffff;
+    }
+    
+    .info {
+      padding: 16px;
+      background: white;
+      border-radius: 4px;
+      margin-top: 16px;
+    }
+    
+    .info p {
+      margin: 8px 0;
+      color: #666;
+    }
+  `;
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  @state()
+  private startDate = '';
+  
+  @state()
+  private daysUntil = 0;
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  private handleDateSelect(e: CustomEvent) {
+    const { value, valueAsDate } = e.detail;
+    this.startDate = value;
+    
+    // Calculate days until vacation
+    const today = new Date();
+    const vacation = valueAsDate;
+    const diff = Math.ceil((vacation.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    this.daysUntil = diff;
+  }
 
-### Step 3: Go live
+  render() {
+    const today = new Date().toISOString().split('T')[0];
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    const maxDate = nextYear.toISOString().split('T')[0];
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    return html`
+      <h1>Plan Your Vacation</h1>
+      
+      <app-date-picker
+        .value=${this.startDate || today}
+        .min=${today}
+        .max=${maxDate}
+        locale="en-US"
+        showWeekNumber
+        disabledDays="0,6"
+        @date-updated=${this.handleDateSelect}
+      ></app-date-picker>
+      
+      ${this.startDate ? html`
+        <div class="info">
+          <p><strong>Vacation Start:</strong> ${this.startDate}</p>
+          <p><strong>Days Until:</strong> ${this.daysUntil} days</p>
+          ${this.daysUntil < 0 ? html`
+            <p style="color: #d32f2f;">This date has passed!</p>
+          ` : ''}
+        </div>
+      ` : html`
+        <div class="info">
+          <p>Select your vacation start date</p>
+        </div>
+      `}
+    `;
+  }
+}
+```
+
+## Value formats
+
+app-datepicker provides three ways to work with date values:
+
+```typescript
+const picker = document.querySelector('app-date-picker');
+
+// Set value (ISO string format: YYYY-MM-DD)
+picker.value = '2024-03-15';
+
+// Get value as ISO string
+console.log(picker.value); // '2024-03-15'
+
+// Get value as Date object
+console.log(picker.valueAsDate); // Date object
+
+// Get value as Unix timestamp (milliseconds)
+console.log(picker.valueAsNumber); // 1710460800000
+```
+
+<Warning>
+The `value` property must always be in `YYYY-MM-DD` format. Invalid formats will be rejected and the previous valid value will be retained.
+</Warning>
+
+## Styling
+
+Customize the appearance using CSS custom properties:
+
+```css
+app-date-picker {
+  /* Primary color - selected date */
+  --app-primary: #6200ee;
+  --app-on-primary: #ffffff;
+  
+  /* Surface colors - background */
+  --app-surface: #ffffff;
+  --app-on-surface: #000000;
+  
+  /* Hover and focus states */
+  --app-hover: #f3e5f5;
+  --app-focus: #7c4dff;
+  
+  /* Today indicator */
+  --app-today: #1976d2;
+  --app-on-today: #ffffff;
+}
+```
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you have a working datepicker, explore more advanced features:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="API Reference" icon="book" href="/api/app-date-picker">
+    Explore all properties, methods, and events for app-date-picker
+  </Card>
+  
+  <Card title="Styling Guide" icon="palette" href="/guides/styling">
+    Learn how to customize colors, spacing, and themes
+  </Card>
+  
+  <Card title="Input Component" icon="input-text" href="/api/app-date-picker-input">
+    Use the date picker with a Material Design text field
+  </Card>
+  
+  <Card title="Dialog Component" icon="window-maximize" href="/api/app-date-picker-dialog">
+    Display the date picker in a modal dialog
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+<Tip>
+Check out the [live demo](https://motss.xyz/demos/app-datepicker) to see all features in action with configurable code snippets.
+</Tip>

@@ -1,0 +1,378 @@
+---
+title: 'app-date-picker-input'
+description: 'Date picker with text field input and dropdown calendar'
+---
+
+## Overview
+
+The `app-date-picker-input` component combines a Material Design text field with a dropdown date picker. It provides a text input that opens a calendar picker when clicked or focused.
+
+## Installation
+
+```bash
+npm install app-datepicker
+```
+
+## Import
+
+```javascript
+import 'app-datepicker/app-date-picker-input';
+```
+
+Or import from specific path:
+
+```javascript
+import 'app-datepicker/dist/date-picker-input/app-date-picker-input.js';
+```
+
+## Usage
+
+<CodeGroup>
+```html Basic
+<app-date-picker-input label="Select Date"></app-date-picker-input>
+```
+
+```html With Value
+<app-date-picker-input
+  label="Birth Date"
+  value="1990-01-15"
+></app-date-picker-input>
+```
+
+```html Required Field
+<app-date-picker-input
+  label="Appointment Date"
+  required
+  helper="Please select a date"
+></app-date-picker-input>
+```
+
+```html Disabled
+<app-date-picker-input
+  label="Disabled"
+  value="2024-01-01"
+  disabled
+></app-date-picker-input>
+```
+
+```html With Date Range
+<app-date-picker-input
+  label="Event Date"
+  min="2024-01-01"
+  max="2024-12-31"
+></app-date-picker-input>
+```
+</CodeGroup>
+
+## Properties
+
+### Input-Specific Properties
+
+<ParamField path="clearLabel" type="string" default="Clear">
+  Accessible label for the clear/reset icon button.
+</ParamField>
+
+<ParamField path="label" type="string">
+  Label text displayed above/in the text field.
+</ParamField>
+
+<ParamField path="helper" type="string">
+  Helper text displayed below the input field.
+</ParamField>
+
+<ParamField path="required" type="boolean" default="false">
+  Marks the field as required.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Disables the input field and picker.
+</ParamField>
+
+<ParamField path="readonly" type="boolean" default="false">
+  Makes the input read-only (picker still works).
+</ParamField>
+
+### Inherited Properties
+
+Inherits all properties from [app-date-picker](/api/app-date-picker#properties):
+
+- `value` - Selected date (string)
+- `min` - Minimum date (string)
+- `max` - Maximum date (string)
+- `locale` - Language code (string)
+- `firstDayOfWeek` - First day of week (number)
+- `showWeekNumber` - Show week numbers (boolean)
+- `weekNumberType` - Week calculation type (string)
+- `startView` - Initial view (string)
+- `disabledDates` - Disabled dates (string)
+- `disabledDays` - Disabled days (string)
+- All label properties
+- `valueAsDate` - Date object (readonly)
+- `valueAsNumber` - Timestamp (readonly)
+
+### Material TextField Properties
+
+Also inherits properties from Material Web Components TextField:
+
+- `outlined` - Use outlined variant (boolean)
+- `helperPersistent` - Always show helper text (boolean)
+- `validationMessage` - Custom validation message (string)
+- `name` - Form field name (string)
+- `autocapitalize` - Auto-capitalization behavior (string)
+- `inputMode` - Input mode hint (string)
+
+## Methods
+
+<ParamField path="showPicker()" type="method">
+  Programmatically opens the date picker dropdown.
+  
+  ```javascript
+  const input = document.querySelector('app-date-picker-input');
+  input.showPicker();
+  ```
+</ParamField>
+
+<ParamField path="closePicker()" type="method">
+  Closes the date picker dropdown.
+  
+  ```javascript
+  const input = document.querySelector('app-date-picker-input');
+  input.closePicker();
+  ```
+</ParamField>
+
+<ParamField path="reset()" type="method">
+  Clears the selected date and resets the input field.
+  
+  ```javascript
+  const input = document.querySelector('app-date-picker-input');
+  input.reset();
+  ```
+</ParamField>
+
+### Material TextField Methods
+
+Also inherits methods from Material TextField:
+
+- `layout()` - Re-layout the text field
+- `setCustomValidity(message)` - Set custom validation message
+
+## Events
+
+### date-updated
+
+Fires when the selected date changes.
+
+```typescript
+interface DateUpdatedDetail {
+  isKeypress: boolean;
+  value: string;
+  valueAsDate: Date;
+  valueAsNumber: number;
+  key?: string;
+}
+```
+
+```javascript
+input.addEventListener('date-updated', (event) => {
+  console.log('Selected date:', event.detail.value);
+  console.log('Formatted:', event.detail.valueAsDate.toLocaleDateString());
+});
+```
+
+### first-updated
+
+Fires when the picker completes its first render.
+
+```typescript
+interface FirstUpdatedDetail {
+  focusableElements: HTMLElement[];
+  value: string;
+  valueAsDate: Date;
+  valueAsNumber: number;
+}
+```
+
+### year-updated
+
+Fires when the selected year changes in the year grid view.
+
+```typescript
+interface YearUpdatedDetail {
+  year: number;
+}
+```
+
+### Menu Events
+
+### opened
+
+Fires when the dropdown picker opens.
+
+```javascript
+input.addEventListener('opened', () => {
+  console.log('Picker opened');
+});
+```
+
+### closed
+
+Fires when the dropdown picker closes.
+
+```javascript
+input.addEventListener('closed', () => {
+  console.log('Picker closed');
+});
+```
+
+## CSS Custom Properties
+
+Inherits all CSS custom properties from [app-date-picker](/api/app-date-picker#css-custom-properties) plus Material TextField properties.
+
+### Input-Specific
+
+<ParamField path="--date-picker-input-icon" type="color" default="rgba(0, 0, 0, .54)">
+  Color of the clear/reset icon button.
+</ParamField>
+
+### Material TextField Properties
+
+Customize the text field appearance:
+
+- `--mdc-theme-primary` - Primary color for labels and underline
+- `--mdc-theme-error` - Error state color
+- `--mdc-text-field-fill-color` - Background fill color
+- `--mdc-text-field-disabled-fill-color` - Disabled background color
+- `--mdc-text-field-ink-color` - Text color
+- `--mdc-text-field-label-ink-color` - Label color
+- `--mdc-text-field-outlined-idle-border-color` - Outlined variant border
+- `--mdc-text-field-outlined-hover-border-color` - Outlined hover border
+
+## CSS Shadow Parts
+
+Inherits all shadow parts from [app-date-picker](/api/app-date-picker#css-shadow-parts):
+
+- `header` - Picker header
+- `body` - Picker body
+- `calendar` - Calendar container
+- `calendar-day` - Calendar day cells
+- `today` - Today's date
+- `year-grid` - Year grid container
+- `year` - Year buttons
+- And all other calendar parts
+
+## Keyboard Navigation
+
+### Input Field
+
+- **Click / Enter / Space** - Open picker
+- **Escape** - Close picker
+- **Tab** - Move focus (closes picker if open)
+
+### Picker (when open)
+
+- **Arrow Keys** - Navigate dates
+- **Enter / Space** - Select date and close
+- **Escape** - Close without selecting
+- **Tab** - Close picker
+
+See [app-date-picker keyboard navigation](/api/app-date-picker#keyboard-navigation) for full calendar controls.
+
+## Example: Form Integration
+
+```html
+<form id="booking-form">
+  <app-date-picker-input
+    name="checkIn"
+    label="Check-in Date"
+    required
+    helper="Select your arrival date"
+    min="2024-01-01"
+  ></app-date-picker-input>
+  
+  <app-date-picker-input
+    name="checkOut"
+    label="Check-out Date"
+    required
+    helper="Select your departure date"
+  ></app-date-picker-input>
+  
+  <button type="submit">Book</button>
+</form>
+
+<script>
+  const form = document.getElementById('booking-form');
+  const checkIn = form.querySelector('[name="checkIn"]');
+  const checkOut = form.querySelector('[name="checkOut"]');
+  
+  // Update check-out minimum when check-in changes
+  checkIn.addEventListener('date-updated', (e) => {
+    checkOut.min = e.detail.value;
+  });
+  
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    console.log('Check-in:', checkIn.value);
+    console.log('Check-out:', checkOut.value);
+  });
+</script>
+```
+
+## Example: Styled Input
+
+```html
+<style>
+  app-date-picker-input {
+    --mdc-theme-primary: #1976d2;
+    --app-primary: #1976d2;
+    --app-on-primary: white;
+    --date-picker-input-icon: #1976d2;
+  }
+  
+  app-date-picker-input::part(calendar-day) {
+    border-radius: 50%;
+  }
+</style>
+
+<app-date-picker-input
+  label="Birthday"
+  outlined
+  max="2024-12-31"
+></app-date-picker-input>
+```
+
+## TypeScript
+
+```typescript
+import type { AppDatePickerInput } from 'app-datepicker/app-date-picker-input';
+
+const input = document.querySelector('app-date-picker-input') as AppDatePickerInput;
+
+// Set value
+input.value = '2024-12-25';
+
+// Get as Date
+const date: Date | null = input.valueAsDate;
+
+// Methods
+input.showPicker();
+input.closePicker();
+input.reset();
+
+// Listen for changes
+input.addEventListener('date-updated', (e) => {
+  const detail = e.detail;
+  console.log(detail.value); // string
+  console.log(detail.valueAsDate); // Date
+});
+```
+
+## Behavior Notes
+
+- The input displays a formatted date (based on locale) while `value` remains in ISO format
+- The input is read-only by default; users select dates via the picker
+- Clicking the clear icon resets the value to empty
+- The picker lazy-loads when first opened for better performance
+- The dropdown stays open when clicking inside the picker
+- Pressing Enter or Space on a date closes the picker automatically
+- The component handles form validation and can be used with native form submission

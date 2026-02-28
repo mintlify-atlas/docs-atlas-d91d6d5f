@@ -1,0 +1,615 @@
+---
+title: Advanced Features
+description: Master advanced functionality including week numbers, disabled dates, date ranges, and custom view configurations
+---
+
+## Week Numbers
+
+Display ISO week numbers alongside calendar dates for business and planning applications.
+
+### Enabling Week Numbers
+
+```typescript
+picker.showWeekNumber = true;
+```
+
+<Tabs>
+  <Tab title="Lit Template">
+    ```typescript
+    import { html } from 'lit';
+
+    const template = html`
+      <app-date-picker
+        .showWeekNumber=${true}
+        weekNumberType="first-4-day-week"
+      ></app-date-picker>
+    `;
+    ```
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const picker = document.querySelector('app-date-picker');
+    picker.showWeekNumber = true;
+    picker.weekNumberType = 'first-4-day-week';
+    ```
+  </Tab>
+  <Tab title="HTML">
+    ```html
+    <app-date-picker
+      showweeknumber
+      weeknumbertype="first-4-day-week"
+    ></app-date-picker>
+    ```
+  </Tab>
+</Tabs>
+
+### Week Number Types
+
+The component supports different week numbering systems:
+
+| Type | Description | Region |
+|------|-------------|--------|
+| `first-4-day-week` | ISO 8601 (default) | International standard, Europe |
+| `first-day-of-year` | Week 1 starts January 1st | North America |
+| `first-full-week` | First complete week | Alternative system |
+
+```typescript
+// ISO 8601 (most common)
+picker.weekNumberType = 'first-4-day-week';
+
+// North American convention
+picker.weekNumberType = 'first-day-of-year';
+
+// First full week
+picker.weekNumberType = 'first-full-week';
+```
+
+<Note>
+  The `first-4-day-week` type follows ISO 8601, where week 1 is the first week with at least 4 days in the new year.
+</Note>
+
+<Accordion title="View week number type definition">
+  From `src/mixins/date-picker-mixin.ts:39`:
+  ```typescript
+  @property({ converter: { toAttribute: nullishAttributeConverter }, reflect: true }) 
+  public weekNumberType: WeekNumberType = 'first-4-day-week';
+  ```
+</Accordion>
+
+### Customizing Week Number Labels
+
+```typescript
+picker.weekLabel = 'Week';              // Full label
+picker.shortWeekLabel = 'Wk';           // Abbreviated label
+picker.weekNumberTemplate = 'Week %s';  // Template for tooltips
+```
+
+<Accordion title="View default week labels">
+  From `src/constants.ts:12-15`:
+  ```typescript
+  export const labelShortWeek = 'Wk' as const;
+  export const labelWeek = 'Week' as const;
+  export const weekNumberTemplate = 'Week %s' as const;
+  ```
+</Accordion>
+
+Example with custom labels:
+
+```typescript
+import { html } from 'lit';
+
+// German week numbers
+const germanWeeks = html`
+  <app-date-picker
+    .showWeekNumber=${true}
+    locale="de-DE"
+    weekLabel="Woche"
+    shortWeekLabel="KW"
+    weekNumberTemplate="Woche %s"
+  ></app-date-picker>
+`;
+```
+
+## Disabled Dates
+
+Prevent selection of specific dates (holidays, blackout dates, unavailable dates).
+
+### Single and Multiple Dates
+
+```typescript
+// Disable single date
+picker.disabledDates = '2024-12-25';
+
+// Disable multiple dates (comma-separated)
+picker.disabledDates = '2024-12-24,2024-12-25,2024-12-26';
+
+// Disable multiple dates (with spaces)
+picker.disabledDates = '2024-01-01, 2024-07-04, 2024-11-28';
+```
+
+<Accordion title="View how disabled dates are processed">
+  From `src/date-picker/date-picker.ts:126-127`:
+  ```typescript
+  disabledDates: splitString(disabledDates, toResolvedDate),
+  ```
+  
+  The `splitString` helper splits the comma-separated string and converts each value using `toResolvedDate`.
+</Accordion>
+
+### Using with Template Literals
+
+```typescript
+import { LitElement, html } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+
+@customElement('booking-calendar')
+export class BookingCalendar extends LitElement {
+  @state()
+  private holidays = [
+    '2024-01-01', // New Year
+    '2024-07-04', // Independence Day
+    '2024-12-25', // Christmas
+  ];
+
+  render() {
+    return html`
+      <app-date-picker
+        .disabledDates=${this.holidays.join(',')}
+      ></app-date-picker>
+    `;
+  }
+}
+```
+
+### Dynamic Disabled Dates
+
+```typescript
+import { LitElement, html } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+
+@customElement('dynamic-disabled-dates')
+export class DynamicDisabledDates extends LitElement {
+  @state()
+  private bookedDates: string[] = [];
+
+  async connectedCallback() {
+    super.connectedCallback();
+    // Fetch booked dates from API
+    const response = await fetch('/api/booked-dates');
+    this.bookedDates = await response.json();
+  }
+
+  render() {
+    return html`
+      <app-date-picker
+        .disabledDates=${this.bookedDates.join(',')}
+        min="2024-01-01"
+        max="2024-12-31"
+      ></app-date-picker>
+    `;
+  }
+}
+```
+
+## Disabled Days of Week
+
+Disable specific days of the week (e.g., weekends, specific business days).
+
+### Basic Usage
+
+```typescript
+// Disable Sundays (0)
+picker.disabledDays = '0';
+
+// Disable weekends (Saturday=6, Sunday=0)
+picker.disabledDays = '0,6';
+
+// Disable Monday and Friday (1,5)
+picker.disabledDays = '1,5';
+```
+
+<Note>
+  Day numbers follow JavaScript's `Date.getDay()` convention: `0` = Sunday, `1` = Monday, ..., `6` = Saturday.
+</Note>
+
+### Common Patterns
+
+<Tabs>
+  <Tab title="Weekends Only">
+    ```typescript
+    // Disable Saturdays and Sundays
+    picker.disabledDays = '0,6';
+    ```
+  </Tab>
+  <Tab title="Weekdays Only">
+    ```typescript
+    // Disable Monday through Friday
+    picker.disabledDays = '1,2,3,4,5';
+    ```
+  </Tab>
+  <Tab title="Business Days">
+    ```typescript
+    // Only allow Monday-Friday
+    picker.disabledDays = '0,6';
+    picker.firstDayOfWeek = 1; // Start week on Monday
+    ```
+  </Tab>
+</Tabs>
+
+<Accordion title="View how disabled days are processed">
+  From `src/date-picker/date-picker.ts:127-128`:
+  ```typescript
+  disabledDays: splitString(disabledDays, Number),
+  ```
+  
+  The `splitString` helper converts comma-separated day numbers to an array of numbers.
+</Accordion>
+
+## Date Range Constraints
+
+Limit selectable dates to a specific range using `min` and `max` properties.
+
+### Basic Range
+
+```typescript
+picker.min = '2024-01-01';
+picker.max = '2024-12-31';
+```
+
+### Dynamic Ranges
+
+```typescript
+import { LitElement, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+@customElement('date-range-picker')
+export class DateRangePicker extends LitElement {
+  private getToday(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  private getMaxDate(): string {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return date.toISOString().split('T')[0];
+  }
+
+  render() {
+    return html`
+      <!-- Only allow next 30 days -->
+      <app-date-picker
+        .min=${this.getToday()}
+        .max=${this.getMaxDate()}
+      ></app-date-picker>
+    `;
+  }
+}
+```
+
+### Default Range Values
+
+<Accordion title="View default min/max dates">
+  From `src/constants.ts:16` and `src/date-picker/date-picker.ts:256-257`:
+  ```typescript
+  export const MAX_DATE = toResolvedDate('2100-12-31');
+  
+  // In DatePicker constructor:
+  this._min = new Date(todayDate);
+  this._max = new Date(MAX_DATE);
+  ```
+</Accordion>
+
+<Warning>
+  If `min` or `max` is set to a falsy value, it will be overridden with the default. The default `min` is today's date, and the default `max` is December 31, 2100.
+</Warning>
+
+### Combining Constraints
+
+```typescript
+import { html } from 'lit';
+
+// Business days only, within next 60 days, excluding holidays
+const businessPicker = html`
+  <app-date-picker
+    .min=${getTodayString()}
+    .max=${getFutureDateString(60)}
+    disabledDays="0,6"
+    disabledDates="2024-07-04,2024-11-28,2024-12-25"
+  ></app-date-picker>
+`;
+
+function getTodayString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getFutureDateString(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split('T')[0];
+}
+```
+
+## Start View Configuration
+
+Control which view the calendar opens to:
+
+```typescript
+// Start with calendar view (default)
+picker.startView = 'calendar';
+
+// Start with year selection
+picker.startView = 'yearGrid';
+```
+
+<Accordion title="View available start views">
+  From `src/constants.ts:22`:
+  ```typescript
+  export const startViews = ['calendar', 'yearGrid'] as const;
+  ```
+</Accordion>
+
+### Use Cases
+
+<Tabs>
+  <Tab title="Birth Date">
+    ```typescript
+    // Start with year selection for birth dates
+    const birthDatePicker = html`
+      <app-date-picker
+        startView="yearGrid"
+        min="1920-01-01"
+        max="2010-12-31"
+      ></app-date-picker>
+    `;
+    ```
+  </Tab>
+  <Tab title="Recent Date">
+    ```typescript
+    // Start with calendar for recent dates
+    const recentDatePicker = html`
+      <app-date-picker
+        startView="calendar"
+        .min=${getLastMonthString()}
+      ></app-date-picker>
+    `;
+    ```
+  </Tab>
+</Tabs>
+
+### View Switching
+
+Users can switch between views by clicking the year/month dropdown button:
+
+<Accordion title="View switch implementation">
+  From `src/date-picker/date-picker.ts:223-225`:
+  ```typescript
+  #updateStartView = (): void => {
+    this.startView = this.startView === 'yearGrid' ? 'calendar' : 'yearGrid';
+  };
+  ```
+</Accordion>
+
+## Value Clamping
+
+When setting a value outside the `min`/`max` range, it's automatically clamped:
+
+```typescript
+picker.min = '2024-01-01';
+picker.max = '2024-12-31';
+
+// Value is clamped to 2024-01-01
+picker.value = '2023-06-15';
+
+// Value is clamped to 2024-12-31
+picker.value = '2025-06-15';
+```
+
+<Accordion title="View clamping implementation">
+  From `src/date-picker/date-picker.ts:419-421`:
+  ```typescript
+  const valueDate = toResolvedDate(
+    clampValue(+newMin.date, +newMax.date, +newValue.date)
+  );
+  ```
+</Accordion>
+
+## Navigation Constraints
+
+Navigation buttons are automatically hidden when at min/max boundaries:
+
+<Accordion title="View navigation constraint logic">
+  From `src/date-picker/date-picker.ts:314-315`:
+  ```typescript
+  ${this.#renderNavigationButton('previous', isInCurrentMonth(_min, _currentDate))}
+  ${this.#renderNavigationButton('next', isInCurrentMonth(_max, _currentDate))}
+  ```
+</Accordion>
+
+## Complete Advanced Example
+
+Here's a complete example combining multiple advanced features:
+
+```typescript
+import { LitElement, html, css } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import 'app-datepicker/dist/date-picker/app-date-picker.js';
+
+@customElement('advanced-booking-calendar')
+export class AdvancedBookingCalendar extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      padding: 24px;
+    }
+
+    .calendar-container {
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .info {
+      margin-top: 16px;
+      padding: 12px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    app-date-picker {
+      --app-primary: #2563eb;
+      --app-on-primary: #ffffff;
+    }
+  `;
+
+  @state()
+  private selectedDate = '';
+
+  @state()
+  private bookedDates: string[] = [];
+
+  // Company holidays
+  private holidays = [
+    '2024-01-01', // New Year's Day
+    '2024-07-04', // Independence Day
+    '2024-11-28', // Thanksgiving
+    '2024-12-25', // Christmas
+  ];
+
+  async connectedCallback() {
+    super.connectedCallback();
+    await this.loadBookedDates();
+  }
+
+  async loadBookedDates() {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    this.bookedDates = [
+      '2024-03-20',
+      '2024-03-21',
+      '2024-03-27',
+    ];
+  }
+
+  get allDisabledDates(): string {
+    return [...this.holidays, ...this.bookedDates].join(',');
+  }
+
+  getTodayString(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  getMaxDateString(): string {
+    // Allow booking up to 90 days in advance
+    const date = new Date();
+    date.setDate(date.getDate() + 90);
+    return date.toISOString().split('T')[0];
+  }
+
+  handleDateUpdate(event: CustomEvent) {
+    this.selectedDate = event.detail.value;
+  }
+
+  render() {
+    return html`
+      <div class="calendar-container">
+        <h2>Book an Appointment</h2>
+        
+        <app-date-picker
+          .min=${this.getTodayString()}
+          .max=${this.getMaxDateString()}
+          .disabledDates=${this.allDisabledDates}
+          disabledDays="0,6"
+          .showWeekNumber=${true}
+          weekNumberType="first-4-day-week"
+          locale="en-US"
+          .firstDayOfWeek=${1}
+          @date-updated=${this.handleDateUpdate}
+        ></app-date-picker>
+
+        ${this.selectedDate ? html`
+          <div class="info">
+            <strong>Selected Date:</strong><br>
+            ${new Date(this.selectedDate).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </div>
+        ` : html`
+          <div class="info">
+            <strong>Booking Rules:</strong>
+            <ul>
+              <li>Weekdays only (Mon-Fri)</li>
+              <li>Up to 90 days in advance</li>
+              <li>Excludes holidays and booked dates</li>
+            </ul>
+          </div>
+        `}
+      </div>
+    `;
+  }
+}
+```
+
+## Keyboard Navigation
+
+The component supports full keyboard navigation:
+
+| Key | Action |
+|-----|--------|
+| Arrow Keys | Navigate between dates |
+| Home | Jump to first day of week |
+| End | Jump to last day of week |
+| Page Up | Previous month |
+| Page Down | Next month |
+| Enter / Space | Select focused date |
+| Escape | Close picker (input variant) |
+| Tab | Move focus through elements |
+
+<Accordion title="View keyboard navigation constants">
+  From `src/constants.ts:17-21`:
+  ```typescript
+  export const navigationKeyListNext = [keyArrowDown, keyPageDown, keyEnd];
+  export const navigationKeyListPrevious = [keyArrowUp, keyPageUp, keyHome];
+  export const navigationKeySetDayNext = new Set([...navigationKeyListNext, keyArrowRight]);
+  export const navigationKeySetDayPrevious = new Set([...navigationKeyListPrevious, keyArrowLeft]);
+  export const navigationKeySetGrid = new Set([...navigationKeySetDayNext, ...navigationKeySetDayPrevious]);
+  ```
+</Accordion>
+
+<Tip>
+  Keyboard navigation automatically skips disabled dates and respects min/max boundaries.
+</Tip>
+
+## Accessibility Features
+
+- Full keyboard navigation support
+- ARIA labels for all interactive elements
+- Screen reader announcements for date changes
+- Focus management for optimal navigation
+- High contrast mode support
+
+<Warning>
+  When using disabled dates extensively, ensure there are selectable dates available. A calendar with all dates disabled provides a poor user experience.
+</Warning>
+
+## Performance Considerations
+
+<Tip>
+  For large numbers of disabled dates (50+), consider server-side date validation instead of passing hundreds of dates via the `disabledDates` property.
+</Tip>
+
+<Tip>
+  Use `disabledDays` instead of `disabledDates` when pattern-based disabling (e.g., all weekends) is sufficient - it's more performant.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="book" href="/api/app-date-picker">
+    Complete property and method documentation
+  </Card>
+  <Card title="Basic Usage" icon="code" href="/guides/basic-usage">
+    See more usage patterns and examples
+  </Card>
+</CardGroup>

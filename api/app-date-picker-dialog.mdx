@@ -1,0 +1,324 @@
+---
+title: 'app-date-picker-dialog'
+description: 'Date picker in a Material Design dialog with action buttons'
+---
+
+## Overview
+
+The `app-date-picker-dialog` component wraps the date picker in a Material Design dialog with confirm, cancel, and reset buttons. It inherits all properties and events from `app-date-picker` and adds dialog-specific functionality.
+
+## Installation
+
+```bash
+npm install app-datepicker
+```
+
+## Import
+
+```javascript
+import 'app-datepicker/app-date-picker-dialog';
+```
+
+Or import from specific path:
+
+```javascript
+import 'app-datepicker/dist/date-picker-dialog/app-date-picker-dialog.js';
+```
+
+## Usage
+
+<CodeGroup>
+```html Basic
+<app-date-picker-dialog></app-date-picker-dialog>
+
+<script>
+  const dialog = document.querySelector('app-date-picker-dialog');
+  dialog.show();
+</script>
+```
+
+```html Custom Labels
+<app-date-picker-dialog
+  confirm-label="OK"
+  dismiss-label="Cancel"
+  reset-label="Clear"
+></app-date-picker-dialog>
+```
+
+```html Controlled
+<button id="open-btn">Open Date Picker</button>
+<app-date-picker-dialog id="dialog"></app-date-picker-dialog>
+
+<script>
+  const dialog = document.getElementById('dialog');
+  const btn = document.getElementById('open-btn');
+  
+  btn.addEventListener('click', () => dialog.show());
+  
+  dialog.addEventListener('date-updated', (e) => {
+    console.log('Selected:', e.detail.value);
+  });
+</script>
+```
+
+```html With Date Range
+<app-date-picker-dialog
+  min="2024-01-01"
+  max="2024-12-31"
+  value="2024-06-15"
+></app-date-picker-dialog>
+```
+</CodeGroup>
+
+## Properties
+
+### Dialog-Specific Properties
+
+<ParamField path="open" type="boolean" default="false">
+  Controls dialog visibility. Set to `true` to show the dialog, `false` to hide it.
+</ParamField>
+
+<ParamField path="confirmLabel" type="string" default="set">
+  Text label for the confirm/accept button.
+</ParamField>
+
+<ParamField path="dismissLabel" type="string" default="cancel">
+  Text label for the cancel/dismiss button.
+</ParamField>
+
+<ParamField path="resetLabel" type="string" default="reset">
+  Text label for the reset button.
+</ParamField>
+
+### Inherited Properties
+
+Inherits all properties from [app-date-picker](/api/app-date-picker#properties):
+
+- `value` - Selected date (string)
+- `min` - Minimum date (string)
+- `max` - Maximum date (string)
+- `locale` - Language code (string)
+- `firstDayOfWeek` - First day of week (number)
+- `showWeekNumber` - Show week numbers (boolean)
+- `weekNumberType` - Week calculation type (string)
+- `startView` - Initial view (string)
+- `disabledDates` - Disabled dates (string)
+- `disabledDays` - Disabled days (string)
+- All label properties
+- `valueAsDate` - Date object (readonly)
+- `valueAsNumber` - Timestamp (readonly)
+
+## Methods
+
+<ParamField path="show()" type="method">
+  Opens the dialog picker.
+  
+  ```javascript
+  const dialog = document.querySelector('app-date-picker-dialog');
+  dialog.show();
+  ```
+</ParamField>
+
+<ParamField path="hide()" type="method">
+  Closes the dialog picker.
+  
+  ```javascript
+  const dialog = document.querySelector('app-date-picker-dialog');
+  dialog.hide();
+  ```
+</ParamField>
+
+## Events
+
+### date-updated
+
+Fires when the user confirms a date selection (clicks the confirm button).
+
+```typescript
+interface DateUpdatedDetail {
+  isKeypress: boolean;
+  value: string;
+  valueAsDate: Date;
+  valueAsNumber: number;
+}
+```
+
+```javascript
+dialog.addEventListener('date-updated', (event) => {
+  console.log('Confirmed date:', event.detail.value);
+});
+```
+
+### first-updated
+
+Fires when the picker completes its first render.
+
+```typescript
+interface FirstUpdatedDetail {
+  focusableElements: HTMLElement[];
+  value: string;
+  valueAsDate: Date;
+  valueAsNumber: number;
+}
+```
+
+### year-updated
+
+Fires when the selected year changes in the year grid view.
+
+```typescript
+interface YearUpdatedDetail {
+  year: number;
+}
+```
+
+### Dialog Events
+
+### opened
+
+Fires after the dialog has fully opened.
+
+```javascript
+dialog.addEventListener('opened', () => {
+  console.log('Dialog opened');
+});
+```
+
+### opening
+
+Fires when the dialog begins to open.
+
+```javascript
+dialog.addEventListener('opening', () => {
+  console.log('Dialog opening...');
+});
+```
+
+### closed
+
+Fires after the dialog has fully closed.
+
+```javascript
+dialog.addEventListener('closed', (event) => {
+  console.log('Dialog closed');
+});
+```
+
+### closing
+
+Fires when the dialog begins to close. The event detail includes the action that triggered closing.
+
+```javascript
+dialog.addEventListener('closing', (event) => {
+  console.log('Action:', event.detail.action); // 'set', 'cancel', or 'reset'
+});
+```
+
+## CSS Custom Properties
+
+Inherits all CSS custom properties from [app-date-picker](/api/app-date-picker#css-custom-properties) plus Material Dialog properties.
+
+### Dialog-Specific
+
+The component uses Material Web Components Dialog. You can customize:
+
+- `--mdc-theme-surface` - Dialog background
+- `--mdc-theme-on-surface` - Dialog text color
+- `--mdc-dialog-scrim-color` - Backdrop color
+- `--mdc-dialog-z-index` - Dialog z-index
+
+Note: `--mdc-dialog-min-width` and `--mdc-shape-medium` are managed internally.
+
+## CSS Shadow Parts
+
+Inherits all shadow parts from [app-date-picker](/api/app-date-picker#css-shadow-parts):
+
+- `header` - Picker header
+- `body` - Picker body
+- `calendar` - Calendar container
+- `calendar-day` - Calendar day cells
+- `today` - Today's date
+- `year-grid` - Year grid container
+- `year` - Year buttons
+- And all other calendar parts
+
+## Example: Complete Integration
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="module">
+    import 'app-datepicker/app-date-picker-dialog';
+  </script>
+  <style>
+    app-date-picker-dialog {
+      --app-primary: #1976d2;
+      --app-on-primary: white;
+    }
+  </style>
+</head>
+<body>
+  <button id="open">Select Date</button>
+  <p>Selected: <span id="output">None</span></p>
+  
+  <app-date-picker-dialog
+    id="dialog"
+    confirm-label="Select"
+    dismiss-label="Cancel"
+    min="2024-01-01"
+    max="2024-12-31"
+  ></app-date-picker-dialog>
+  
+  <script>
+    const dialog = document.getElementById('dialog');
+    const openBtn = document.getElementById('open');
+    const output = document.getElementById('output');
+    
+    openBtn.addEventListener('click', () => {
+      dialog.show();
+    });
+    
+    dialog.addEventListener('date-updated', (e) => {
+      output.textContent = e.detail.value;
+    });
+    
+    dialog.addEventListener('closed', (e) => {
+      console.log('Dialog closed');
+    });
+  </script>
+</body>
+</html>
+```
+
+## TypeScript
+
+```typescript
+import type { AppDatePickerDialog } from 'app-datepicker/app-date-picker-dialog';
+
+const dialog = document.querySelector('app-date-picker-dialog') as AppDatePickerDialog;
+
+// Show dialog
+dialog.show();
+
+// Listen for confirmation
+dialog.addEventListener('closing', (e) => {
+  if (e.detail.action === 'set') {
+    console.log('Date confirmed:', dialog.value);
+  } else if (e.detail.action === 'reset') {
+    console.log('Date reset');
+  }
+});
+
+// Programmatic control
+dialog.value = '2024-12-25';
+const selectedDate: Date = dialog.valueAsDate;
+```
+
+## Behavior Notes
+
+- The dialog only updates the `value` property when the user clicks the confirm button
+- Clicking cancel or dismissing the dialog reverts to the previous value
+- The reset button sets the value to today's date
+- The dialog lazy-loads its content for better performance
+- Pressing ESC or clicking the backdrop dismisses the dialog (equivalent to cancel)

@@ -1,0 +1,531 @@
+---
+title: Styling & Theming
+description: Customize the appearance of app-datepicker using CSS custom properties and Shadow DOM styling
+---
+
+## Overview
+
+app-datepicker is built with Material Design 2021 principles and uses CSS custom properties (CSS variables) for theming. The component renders within Shadow DOM, providing encapsulation while still allowing customization through CSS variables.
+
+<Note>
+  All styling is done through CSS custom properties, making it easy to theme the component without requiring deep CSS knowledge.
+</Note>
+
+## CSS Custom Properties
+
+The component exposes a comprehensive set of CSS custom properties for theming:
+
+### Color Properties
+
+<Accordion title="View all color custom properties">
+  From `src/stylings.ts:5-25`:
+  ```css
+  :host {
+    --_focus: var(--app-focus, #000);
+    --_hover: var(--app-hover, #6200ee);
+    --_on-disabled: var(--app-on-disabled, rgba(0, 0, 0, .38));
+    --_on-focus: var(--app-on-focus, #000);
+    --_on-hover: var(--app-on-hover, #000);
+    --_on-primary: var(--app-on-primary, #fff);
+    --_on-surface: var(--app-on-surface, #000);
+    --_on-today: var(--app-on-today, #000);
+    --_on-week-number: var(--app-on-week-number, #8c8c8c);
+    --_on-weekday: var(--app-on-weekday, #8c8c8c);
+    --_primary: var(--app-primary, #6200ee);
+    --_selected-focus: var(--app-selected-focus, #000);
+    --_selected-hover: var(--app-selected-hover, #6200ee);
+    --_selected-on-focus: var(--app-selected-on-focus, #fff);
+    --_selected-on-hover: var(--app-selected-on-hover, #fff);
+    --_shape: var(--app-shape, 4px);
+    --_surface: var(--app-surface, #fff);
+    --_today: var(--app-today, #000);
+  }
+  ```
+</Accordion>
+
+### Primary Theme Colors
+
+```css
+app-date-picker {
+  /* Primary brand color - used for selected dates */
+  --app-primary: #6200ee;
+  
+  /* Text color on primary background */
+  --app-on-primary: #fff;
+  
+  /* Surface background color */
+  --app-surface: #fff;
+  
+  /* Text color on surface */
+  --app-on-surface: #000;
+}
+```
+
+### Interactive States
+
+```css
+app-date-picker {
+  /* Hover state colors */
+  --app-hover: #6200ee;
+  --app-on-hover: #000;
+  
+  /* Focus state colors */
+  --app-focus: #000;
+  --app-on-focus: #000;
+  
+  /* Selected date hover/focus */
+  --app-selected-hover: #6200ee;
+  --app-selected-on-hover: #fff;
+  --app-selected-focus: #000;
+  --app-selected-on-focus: #fff;
+  
+  /* Disabled state */
+  --app-on-disabled: rgba(0, 0, 0, .38);
+}
+```
+
+### Special Elements
+
+```css
+app-date-picker {
+  /* Today's date indicator */
+  --app-today: #000;
+  --app-on-today: #000;
+  
+  /* Week numbers */
+  --app-on-week-number: #8c8c8c;
+  
+  /* Weekday headers */
+  --app-on-weekday: #8c8c8c;
+  
+  /* Border radius */
+  --app-shape: 4px;
+}
+```
+
+## Theme Examples
+
+### Material Purple (Default)
+
+```css
+app-date-picker {
+  --app-primary: #6200ee;
+  --app-on-primary: #fff;
+  --app-hover: #6200ee;
+  --app-selected-hover: #6200ee;
+}
+```
+
+### Blue Theme
+
+```css
+app-date-picker {
+  --app-primary: #1976d2;
+  --app-on-primary: #ffffff;
+  --app-hover: #1976d2;
+  --app-selected-hover: #1976d2;
+  --app-focus: #1976d2;
+}
+```
+
+### Green Theme
+
+```css
+app-date-picker {
+  --app-primary: #388e3c;
+  --app-on-primary: #ffffff;
+  --app-hover: #66bb6a;
+  --app-selected-hover: #388e3c;
+  --app-today: #388e3c;
+}
+```
+
+### Dark Theme
+
+```css
+app-date-picker {
+  --app-surface: #1e1e1e;
+  --app-on-surface: #ffffff;
+  --app-primary: #bb86fc;
+  --app-on-primary: #000000;
+  --app-hover: #bb86fc;
+  --app-on-hover: #ffffff;
+  --app-selected-hover: #bb86fc;
+  --app-today: #03dac6;
+  --app-on-today: #000000;
+  --app-on-weekday: #b0b0b0;
+  --app-on-week-number: #808080;
+  --app-on-disabled: rgba(255, 255, 255, .38);
+}
+```
+
+<Tip>
+  Use the `@media (prefers-color-scheme: dark)` query to automatically switch themes based on user preferences.
+</Tip>
+
+## Component-Specific Styling
+
+### Date Picker Dimensions
+
+<Accordion title="View dimension custom properties">
+  From `src/date-picker/stylings.ts:4-11`:
+  ```css
+  :host {
+    --_col: 7;
+    --_row: 6;
+
+    --_body-h: calc(4px + calc(32px * 7)); /** 228px */;
+    --_h: calc(var(--_header-h) + var(--_body-h)); /** 52 + 228 = 280 */
+    --_header-h: 52px;
+    --_w: calc((16px * 2) + (32px * var(--_col))); /** 32 + 224 = 256 */
+  ```
+</Accordion>
+
+```css
+app-date-picker {
+  /* Default: 256px (7 columns * 32px + 32px padding) */
+  --date-picker-min-width: 256px;
+  --date-picker-max-width: 256px;
+  
+  /* Default: 280px (52px header + 228px body) */
+  --date-picker-min-height: 280px;
+  --date-picker-max-height: 280px;
+}
+
+/* When week numbers are shown, width adjusts to 8 columns */
+app-date-picker[showweeknumber] {
+  --date-picker-min-width: 288px;
+  --date-picker-max-width: 288px;
+}
+```
+
+### SVG Icons
+
+```css
+app-date-picker {
+  --svg-icon-min-width: 24px;
+  --svg-icon-min-height: 24px;
+  --svg-icon-fill: currentColor;
+}
+```
+
+### Scrollbar Styling
+
+The component includes custom scrollbar styling for webkit browsers:
+
+<Accordion title="View scrollbar styling">
+  From `src/stylings.ts:89-119`:
+  ```css
+  ::-webkit-scrollbar {
+    width: 8px;
+    background: none;
+  }
+  ::-webkit-scrollbar-thumb {
+    width: inherit;
+    background-color: #cdcdcd;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, .35);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background-color: rgba(0, 0, 0, .55);
+  }
+  @media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-thumb {
+      background-color: #686868;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #494949;
+    }
+    ::-webkit-scrollbar-thumb:active {
+      background-color: #5a5a5a;
+    }
+  }
+  ```
+</Accordion>
+
+## Shadow Parts
+
+The component exposes Shadow Parts for advanced styling:
+
+### Date Picker Parts
+
+```css
+/* Style the header section */
+app-date-picker::part(header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+/* Style the body section */
+app-date-picker::part(body) {
+  background: #f5f5f5;
+}
+
+/* Style calendar table */
+app-date-picker::part(table) {
+  border-spacing: 4px;
+}
+
+/* Style weekday headers */
+app-date-picker::part(weekday) {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Style calendar day cells */
+app-date-picker::part(calendar-day) {
+  border-radius: 50%;
+}
+
+/* Style today's date */
+app-date-picker::part(today) {
+  font-weight: bold;
+  border: 2px solid var(--app-today);
+}
+
+/* Style week numbers */
+app-date-picker::part(week-number) {
+  font-size: 12px;
+  opacity: 0.6;
+}
+```
+
+<Accordion title="View all available parts">
+  From `src/date-picker/date-picker.ts:157-158`:
+  ```html
+  <!-- Calendar view -->
+  exportparts="table,caption,weekdays,weekday,weekday-value,week-number,calendar-day,today,calendar"
+  
+  <!-- Year grid view -->
+  exportparts="year-grid,year,toyear"
+  ```
+</Accordion>
+
+## Responsive Styling
+
+```css
+/* Mobile: Full width */
+@media (max-width: 599px) {
+  app-date-picker {
+    --date-picker-min-width: 100%;
+    --date-picker-max-width: 100%;
+  }
+}
+
+/* Tablet and above: Fixed width */
+@media (min-width: 600px) {
+  app-date-picker {
+    --date-picker-min-width: 320px;
+    --date-picker-max-width: 320px;
+  }
+}
+```
+
+## Complete Theming Example
+
+Here's a complete example with Lit showing custom theming:
+
+```typescript
+import { LitElement, html, css } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import 'app-datepicker/dist/date-picker/app-date-picker.js';
+
+@customElement('themed-date-picker')
+export class ThemedDatePicker extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      padding: 24px;
+    }
+
+    .picker-container {
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    /* Custom theme */
+    app-date-picker {
+      /* Primary colors */
+      --app-primary: #ff6b6b;
+      --app-on-primary: #ffffff;
+      --app-surface: #ffffff;
+      --app-on-surface: #2d3748;
+      
+      /* Interactive states */
+      --app-hover: #ff8787;
+      --app-on-hover: #ffffff;
+      --app-focus: #ff6b6b;
+      --app-selected-hover: #ff5252;
+      
+      /* Special elements */
+      --app-today: #4ecdc4;
+      --app-on-today: #ffffff;
+      --app-on-weekday: #718096;
+      --app-on-week-number: #a0aec0;
+      
+      /* Shape */
+      --app-shape: 8px;
+      
+      /* Size */
+      --date-picker-min-width: 320px;
+      --date-picker-max-width: 320px;
+    }
+
+    /* Shadow part styling */
+    app-date-picker::part(header) {
+      border-bottom: 2px solid #ff6b6b;
+    }
+
+    app-date-picker::part(calendar-day) {
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+
+    app-date-picker::part(calendar-day):hover {
+      transform: scale(1.1);
+    }
+
+    app-date-picker::part(today) {
+      box-shadow: 0 0 0 2px #4ecdc4;
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      app-date-picker {
+        --app-surface: #1a202c;
+        --app-on-surface: #e2e8f0;
+        --app-primary: #fc8181;
+        --app-on-primary: #1a202c;
+        --app-hover: #feb2b2;
+        --app-today: #4fd1c5;
+        --app-on-weekday: #a0aec0;
+        --app-on-disabled: rgba(255, 255, 255, .3);
+      }
+    }
+  `;
+
+  render() {
+    return html`
+      <div class="picker-container">
+        <h2>Custom Themed Date Picker</h2>
+        <app-date-picker
+          .showWeekNumber=${true}
+          value="2024-03-15"
+        ></app-date-picker>
+      </div>
+    `;
+  }
+}
+```
+
+## Material Design 2021
+
+The component follows Material Design 2021 principles:
+
+- **Elevation**: Uses flat design with subtle shadows
+- **Typography**: System fonts with appropriate sizing
+- **Color System**: Supports primary, surface, and state colors
+- **Shape**: Customizable border radius (default 4px)
+- **Motion**: Smooth transitions for interactive elements
+
+<Note>
+  The component uses `overscroll-behavior: contain` to prevent scroll chaining, providing a better user experience on mobile devices.
+</Note>
+
+## Accessibility Considerations
+
+When styling, maintain sufficient color contrast:
+
+```css
+app-date-picker {
+  /* Ensure contrast ratio >= 4.5:1 for text */
+  --app-on-surface: #000000;
+  --app-surface: #ffffff;
+  
+  /* Ensure focus states are clearly visible */
+  --app-focus: #0066cc;
+  
+  /* Keep disabled states distinguishable */
+  --app-on-disabled: rgba(0, 0, 0, .38);
+}
+```
+
+<Warning>
+  Always test your color combinations for accessibility compliance. Use tools like the WebAIM Contrast Checker to verify contrast ratios.
+</Warning>
+
+## Dynamic Theming
+
+Change themes at runtime using JavaScript:
+
+```typescript
+import { LitElement, html, css } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+
+@customElement('dynamic-theme-picker')
+export class DynamicThemePicker extends LitElement {
+  static styles = css`
+    .theme-buttons button {
+      margin: 4px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  `;
+
+  @state()
+  private theme = 'purple';
+
+  private themes = {
+    purple: {
+      primary: '#6200ee',
+      hover: '#6200ee',
+      today: '#000',
+    },
+    blue: {
+      primary: '#1976d2',
+      hover: '#1976d2',
+      today: '#1976d2',
+    },
+    green: {
+      primary: '#388e3c',
+      hover: '#66bb6a',
+      today: '#388e3c',
+    },
+  };
+
+  render() {
+    const currentTheme = this.themes[this.theme];
+    
+    return html`
+      <div class="theme-buttons">
+        <button @click=${() => this.theme = 'purple'}>Purple</button>
+        <button @click=${() => this.theme = 'blue'}>Blue</button>
+        <button @click=${() => this.theme = 'green'}>Green</button>
+      </div>
+
+      <app-date-picker
+        style="
+          --app-primary: ${currentTheme.primary};
+          --app-hover: ${currentTheme.hover};
+          --app-today: ${currentTheme.today};
+        "
+      ></app-date-picker>
+    `;
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Advanced Features" icon="wand-magic-sparkles" href="/guides/advanced-features">
+    Explore week numbers, disabled dates, and more
+  </Card>
+  <Card title="API Reference" icon="book" href="/api/date-picker">
+    View complete property and method documentation
+  </Card>
+</CardGroup>

@@ -1,0 +1,451 @@
+---
+title: Localization
+description: Internationalize your date picker for different languages, locales, and date formatting preferences
+---
+
+## Overview
+
+app-datepicker uses the native `Intl.DateTimeFormat` API for internationalization, providing automatic localization for over 100 locales without requiring additional language packs.
+
+<Note>
+  The component leverages the browser's built-in internationalization capabilities, ensuring consistent formatting across your application.
+</Note>
+
+## Setting the Locale
+
+### Basic Locale Configuration
+
+Set the `locale` property to any valid BCP 47 language tag:
+
+```typescript
+// American English (default)
+picker.locale = 'en-US';
+
+// British English
+picker.locale = 'en-GB';
+
+// Traditional Chinese (Taiwan)
+picker.locale = 'zh-TW';
+
+// German (Germany)
+picker.locale = 'de-DE';
+
+// Japanese
+picker.locale = 'ja-JP';
+
+// Arabic (Saudi Arabia)
+picker.locale = 'ar-SA';
+```
+
+### Auto-Detection
+
+If no locale is specified, the component automatically uses the browser's locale:
+
+```typescript
+// From src/mixins/date-picker-mixin.ts:20
+// Default: DateTimeFormat().resolvedOptions().locale
+```
+
+<Tabs>
+  <Tab title="Lit Template">
+    ```typescript
+    import { html } from 'lit';
+
+    const template = html`
+      <app-date-picker locale="fr-FR"></app-date-picker>
+    `;
+    ```
+  </Tab>
+  <Tab title="JavaScript">
+    ```javascript
+    const picker = document.querySelector('app-date-picker');
+    picker.locale = 'es-ES';
+    ```
+  </Tab>
+  <Tab title="HTML Attribute">
+    ```html
+    <app-date-picker locale="it-IT"></app-date-picker>
+    ```
+  </Tab>
+</Tabs>
+
+## Date Format Examples
+
+The locale affects how dates are displayed throughout the component:
+
+<CodeGroup>
+```typescript en-US
+// American English
+picker.locale = 'en-US';
+// Selected: Mar 15, 2024
+// Month/Year: March 2024
+// Weekday: Mon, Tue, Wed...
+```
+
+```typescript zh-TW
+// Traditional Chinese (Taiwan)
+picker.locale = 'zh-TW';
+// Selected: 2024年3月15日
+// Month/Year: 2024年3月
+// Weekday: 週一, 週二, 週三...
+```
+
+```typescript de-DE
+// German
+picker.locale = 'de-DE';
+// Selected: 15. März 2024
+// Month/Year: März 2024
+// Weekday: Mo, Di, Mi...
+```
+
+```typescript ar-SA
+// Arabic (Saudi Arabia)
+picker.locale = 'ar-SA';
+// Selected: ١٥ مارس ٢٠٢٤
+// Month/Year: مارس ٢٠٢٤
+// Right-to-left layout supported
+```
+</CodeGroup>
+
+## Internal Formatters
+
+The component creates multiple `Intl.DateTimeFormat` instances for different parts of the UI. Here's how they're configured:
+
+<Accordion title="View formatter implementation">
+  From `src/helpers/to-formatters.ts:6-42`:
+  ```typescript
+  export function toFormatters(locale: string): Formatters {
+    const dateFmt = DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+      weekday: 'short',
+    });
+    const dayFmt = DateTimeFormat(locale, { day: 'numeric', timeZone: 'UTC' });
+    const fullDateFmt = DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+      year: 'numeric',
+    });
+    const longMonthYearFmt = DateTimeFormat(locale, {
+      month: 'long',
+      timeZone: 'UTC',
+      year: 'numeric',
+    });
+    const longWeekdayFmt = DateTimeFormat(locale, { timeZone: 'UTC', weekday: 'long' });
+    const longMonthFmt = DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' });
+    const narrowWeekdayFmt = DateTimeFormat(locale, { timeZone: 'UTC', weekday: 'narrow' });
+    const yearFmt = DateTimeFormat(locale, { timeZone: 'UTC', year: 'numeric' });
+
+    return {
+      dateFormat: getFormatter(dateFmt),
+      dayFormat: getFormatter(dayFmt),
+      fullDateFormat: getFormatter(fullDateFmt),
+      locale,
+      longMonthFormat: getFormatter(longMonthFmt),
+      longMonthYearFormat: getFormatter(longMonthYearFmt),
+      longWeekdayFormat: getFormatter(longWeekdayFmt),
+      narrowWeekdayFormat: getFormatter(narrowWeekdayFmt),
+      yearFormat: getFormatter(yearFmt),
+    };
+  }
+  ```
+</Accordion>
+
+### Formatter Types
+
+The component uses these formatters internally:
+
+| Formatter | Purpose | Example (en-US) | Example (ja-JP) |
+|-----------|---------|-----------------|------------------|
+| `dateFormat` | Calendar day cells | Mar 15, Fri | 3月15日(金) |
+| `dayFormat` | Day number only | 15 | 15 |
+| `fullDateFormat` | Full date with year | Mar 15, 2024 | 2024年3月15日 |
+| `longMonthYearFormat` | Header display | March 2024 | 2024年3月 |
+| `longWeekdayFormat` | Accessibility labels | Friday | 金曜日 |
+| `narrowWeekdayFormat` | Weekday headers | F | 金 |
+| `yearFormat` | Year grid | 2024 | 2024年 |
+
+## First Day of Week
+
+Customize which day starts the week:
+
+```typescript
+// Sunday (default: 0)
+picker.firstDayOfWeek = 0;
+
+// Monday (common in Europe)
+picker.firstDayOfWeek = 1;
+
+// Saturday (common in Middle East)
+picker.firstDayOfWeek = 6;
+```
+
+<Tabs>
+  <Tab title="Sunday Start">
+    ```typescript
+    // American convention
+    picker.firstDayOfWeek = 0;
+    // Week: Sun Mon Tue Wed Thu Fri Sat
+    ```
+  </Tab>
+  <Tab title="Monday Start">
+    ```typescript
+    // ISO 8601 / European convention
+    picker.firstDayOfWeek = 1;
+    // Week: Mon Tue Wed Thu Fri Sat Sun
+    ```
+  </Tab>
+  <Tab title="Saturday Start">
+    ```typescript
+    // Middle Eastern convention
+    picker.firstDayOfWeek = 6;
+    // Week: Sat Sun Mon Tue Wed Thu Fri
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  The value is `0` for Sunday through `6` for Saturday, matching JavaScript's `Date.getDay()` convention.
+</Note>
+
+## Customizing Labels
+
+Override default UI labels for complete localization:
+
+### Navigation Labels
+
+```typescript
+picker.nextMonthLabel = 'Nächster Monat';        // Default: 'Next month'
+picker.previousMonthLabel = 'Vorheriger Monat';  // Default: 'Previous month'
+picker.chooseMonthLabel = 'Monat wählen';        // Default: 'Choose month'
+picker.chooseYearLabel = 'Jahr wählen';          // Default: 'Choose year'
+```
+
+<Accordion title="View default label constants">
+  From `src/constants.ts:6-14`:
+  ```typescript
+  export const labelChooseMonth = 'Choose month' as const;
+  export const labelChooseYear = 'Choose year' as const;
+  export const labelNextMonth = 'Next month' as const;
+  export const labelPreviousMonth = 'Previous month' as const;
+  export const labelSelectedDate = 'Selected date' as const;
+  export const labelSelectedYear = 'Selected year' as const;
+  export const labelShortWeek = 'Wk' as const;
+  export const labelToday = 'Today' as const;
+  export const labelToyear = 'Toyear' as const;
+  export const labelWeek = 'Week' as const;
+  ```
+</Accordion>
+
+### Date Labels
+
+```typescript
+picker.todayLabel = 'Aujourd\'hui';      // Default: 'Today'
+picker.selectedDateLabel = 'Date sélectionnée';  // Default: 'Selected date'
+picker.selectedYearLabel = 'Année sélectionnée'; // Default: 'Selected year'
+```
+
+### Week Number Labels
+
+```typescript
+picker.weekLabel = 'Semaine';           // Default: 'Week'
+picker.shortWeekLabel = 'Sem';          // Default: 'Wk'
+picker.weekNumberTemplate = 'Semaine %s'; // Default: 'Week %s'
+```
+
+## Complete Localization Example
+
+Here's a fully localized French date picker:
+
+```typescript
+import { LitElement, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import 'app-datepicker/dist/date-picker/app-date-picker.js';
+
+@customElement('french-date-picker')
+export class FrenchDatePicker extends LitElement {
+  render() {
+    return html`
+      <app-date-picker
+        locale="fr-FR"
+        .firstDayOfWeek=${1}
+        .showWeekNumber=${true}
+        nextMonthLabel="Mois suivant"
+        previousMonthLabel="Mois précédent"
+        chooseMonthLabel="Choisir le mois"
+        chooseYearLabel="Choisir l'année"
+        todayLabel="Aujourd'hui"
+        selectedDateLabel="Date sélectionnée"
+        selectedYearLabel="Année sélectionnée"
+        weekLabel="Semaine"
+        shortWeekLabel="Sem"
+        weekNumberTemplate="Semaine %s"
+      ></app-date-picker>
+    `;
+  }
+}
+```
+
+## Localization with Dialog
+
+The dialog component includes additional labels for action buttons:
+
+```typescript
+import { html } from 'lit';
+
+const germanDialog = html`
+  <app-date-picker-dialog
+    locale="de-DE"
+    confirmLabel="Bestätigen"
+    dismissLabel="Abbrechen"
+    resetLabel="Zurücksetzen"
+    chooseMonthLabel="Monat wählen"
+    chooseYearLabel="Jahr wählen"
+  ></app-date-picker-dialog>
+`;
+```
+
+## Localization with Input
+
+The input component includes a clear button label:
+
+```typescript
+import { html } from 'lit';
+
+const spanishInput = html`
+  <app-date-picker-input
+    locale="es-ES"
+    label="Seleccionar fecha"
+    clearLabel="Limpiar"
+  ></app-date-picker-input>
+`;
+```
+
+<Accordion title="View default clear label">
+  From `src/date-picker-input/constants.ts:3`:
+  ```typescript
+  export const appDatePickerInputClearLabel = 'Clear' as const;
+  ```
+</Accordion>
+
+## Dynamic Locale Switching
+
+Change locale dynamically at runtime:
+
+```typescript
+import { LitElement, html } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+
+@customElement('multi-locale-picker')
+export class MultiLocalePicker extends LitElement {
+  @state()
+  private locale = 'en-US';
+
+  private locales = [
+    { code: 'en-US', name: 'English (US)' },
+    { code: 'zh-TW', name: '繁體中文' },
+    { code: 'ja-JP', name: '日本語' },
+    { code: 'de-DE', name: 'Deutsch' },
+  ];
+
+  render() {
+    return html`
+      <select @change=${this.handleLocaleChange}>
+        ${this.locales.map(l => html`
+          <option value=${l.code} ?selected=${l.code === this.locale}>
+            ${l.name}
+          </option>
+        `)}
+      </select>
+
+      <app-date-picker
+        .locale=${this.locale}
+        .firstDayOfWeek=${this.getFirstDayOfWeek()}
+      ></app-date-picker>
+    `;
+  }
+
+  private handleLocaleChange(e: Event) {
+    this.locale = (e.target as HTMLSelectElement).value;
+  }
+
+  private getFirstDayOfWeek(): number {
+    // Monday for most European locales
+    if (['de-DE', 'fr-FR', 'it-IT'].includes(this.locale)) {
+      return 1;
+    }
+    // Sunday for US and others
+    return 0;
+  }
+}
+```
+
+## Testing Localization
+
+Here's an example from the test suite showing locale behavior:
+
+<Accordion title="View locale test example">
+  From `src/__tests__/date-picker/app-date-picker.test.ts:109-141`:
+  ```typescript
+  it.each<{
+    $_locale: string,
+    $_yearMonthLabel: string;
+    locale: string | undefined,
+  }>([
+    {
+      $_locale: Intl.DateTimeFormat().resolvedOptions().locale,
+      $_yearMonthLabel: 'February 2020',
+      locale: undefined,
+    },
+    {
+      $_locale: 'zh-TW',
+      $_yearMonthLabel: '2020年2月',
+      locale: 'zh-TW',
+    },
+  ])(\`renders (locale=$locale)\`, async ({
+    $_locale,
+    $_yearMonthLabel,
+    locale,
+  }) => {
+    const testValue = '2020-02-02';
+    const el = await fixture<AppDatePicker>(
+      html\`<app-date-picker .locale=\${locale as never} min="1970-01-01" value=\${testValue}></app-date-picker>\`
+    );
+
+    const selectedYearMonth = el.query<HTMLParagraphElement>(
+      elementSelectors.selectedYearMonth
+    );
+
+    expect(el.locale).toBe($_locale);
+    expect(el.value).toBe(testValue);
+    expect(selectedYearMonth).toHaveTextContent($_yearMonthLabel);
+  });
+  ```
+</Accordion>
+
+## Best Practices
+
+<Tip>
+  **Always specify locale explicitly** for consistent behavior across different browsers and user settings.
+</Tip>
+
+<Tip>
+  **Match firstDayOfWeek to locale conventions** for the best user experience (e.g., Monday for European locales).
+</Tip>
+
+<Warning>
+  Changing the locale after component initialization will re-render the calendar. Avoid frequent locale changes for better performance.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Styling" icon="palette" href="/guides/styling">
+    Customize the visual appearance of the date picker
+  </Card>
+  <Card title="Advanced Features" icon="wand-magic-sparkles" href="/guides/advanced-features">
+    Configure week numbers, disabled dates, and more
+  </Card>
+</CardGroup>
